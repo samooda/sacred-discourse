@@ -1,8 +1,9 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { topics } from '../data/posts'
+import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
-  const location = useLocation()
+  const { user, signOut } = useAuth()
 
   return (
     <nav
@@ -43,23 +44,34 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right — auth links */}
+          {/* Right — auth */}
           <div className="flex items-center gap-2">
-            <Link
-              to="/login"
-              className="px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-100 transition-colors rounded-md hover:bg-gray-800/60"
-            >
-              Log in
-            </Link>
-            <Link
-              to="/signup"
-              className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
-              style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-            >
-              Sign up
-            </Link>
+            {user ? (
+              <button
+                onClick={signOut}
+                className="px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-100 transition-colors rounded-md hover:bg-gray-800/60"
+              >
+                Sign out
+              </button>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-100 transition-colors rounded-md hover:bg-gray-800/60"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
+                  style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -36,8 +36,7 @@ export default function HomePage() {
             seekers come together to challenge ideas, defend convictions, and pursue truth
             through honest, rigorous discourse across the world's great religious traditions.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
+          <Link
               to="/topic/christianity"
               className="px-6 py-3 rounded-lg font-medium text-sm transition-colors"
               style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
@@ -46,14 +45,6 @@ export default function HomePage() {
             >
               Browse discussions
             </Link>
-            <Link
-              to="/signup"
-              className="px-6 py-3 rounded-lg font-medium text-sm border transition-colors text-gray-300 hover:text-white hover:border-gray-500"
-              style={{ borderColor: '#374151', backgroundColor: 'transparent' }}
-            >
-              Create account
-            </Link>
-          </div>
         </div>
       </section>
 
