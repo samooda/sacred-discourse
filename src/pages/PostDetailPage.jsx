@@ -23,6 +23,7 @@ export default function PostDetailPage() {
   const [replyText, setReplyText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [replyError, setReplyError] = useState(null)
+  const [postGone, setPostGone] = useState(false)
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -106,7 +107,11 @@ export default function PostDetailPage() {
     })
 
     if (error) {
-      setReplyError(error.message)
+      if (error.message.toLowerCase().includes('foreign key constraint')) {
+        setPostGone(true)
+      } else {
+        setReplyError(error.message)
+      }
       setSubmitting(false)
     } else {
       setReplyText('')
@@ -396,7 +401,27 @@ export default function PostDetailPage() {
             style={{ borderColor: '#1f2937' }}
           >
             <h3 className="text-sm font-medium text-gray-400 mb-3">Add a reply</h3>
-            {replyError && (
+            {postGone ? (
+              <div
+                className="rounded-lg px-4 py-3 mb-3 text-sm border"
+                style={{
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  color: '#fca5a5',
+                }}
+              >
+                <p className="mb-2">This post no longer exists. It may have been deleted.</p>
+                <Link
+                  to={`/topic/${topicSlug}`}
+                  className="underline underline-offset-2 transition-colors"
+                  style={{ color: '#fca5a5' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#fca5a5')}
+                >
+                  Back to {topic.name}
+                </Link>
+              </div>
+            ) : replyError ? (
               <div
                 className="rounded-lg px-4 py-3 mb-3 text-sm border"
                 style={{
@@ -407,7 +432,7 @@ export default function PostDetailPage() {
               >
                 {replyError}
               </div>
-            )}
+            ) : null}
             <form onSubmit={handleReply}>
               <textarea
                 required
