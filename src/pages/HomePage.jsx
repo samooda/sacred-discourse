@@ -1,7 +1,36 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { topics, posts } from '../data/posts'
+import { topics } from '../data/posts'
+import { supabase } from '../lib/supabase'
 
 export default function HomePage() {
+  const [postCounts, setPostCounts] = useState({})
+  const [latestPosts, setLatestPosts] = useState({})
+
+  useEffect(() => {
+    async function fetchData() {
+      // Single query for both post counts and latest-post previews.
+      // Ordered newest-first so the first result per slug is the latest post.
+      const { data } = await supabase
+        .from('posts')
+        .select('topic_slug, title, profiles ( display_name )')
+        .order('created_at', { ascending: false })
+
+      if (data) {
+        const counts = {}
+        const latest = {}
+        for (const t of topics) {
+          const forTopic = data.filter((p) => p.topic_slug === t.slug)
+          counts[t.slug] = forTopic.length
+          latest[t.slug] = forTopic[0] ?? null
+        }
+        setPostCounts(counts)
+        setLatestPosts(latest)
+      }
+    }
+    fetchData()
+  }, [])
+
   return (
     <main>
       {/* Hero */}
@@ -48,26 +77,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats bar */}
-      <section
-        className="border-b"
-        style={{ borderColor: '#1f2937', backgroundColor: '#0d0d17' }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap gap-8 justify-center">
-          {[
-            { label: 'Topics', value: '4' },
-            { label: 'Posts', value: '16' },
-            { label: 'Traditions covered', value: '4' },
-            { label: 'Open discussion', value: '∞' },
-          ].map(({ label, value }) => (
-            <div key={label} className="text-center">
-              <div className="text-xl font-bold text-white">{value}</div>
-              <div className="text-xs text-gray-500">{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Topic cards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-10">
@@ -78,7 +87,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {topics.map((topic) => {
-            const topicPosts = posts[topic.slug] || []
+            const latestPost = latestPosts[topic.slug]
             return (
               <Link
                 key={topic.slug}
@@ -122,7 +131,7 @@ export default function HomePage() {
                           {topic.name}
                         </h3>
                         <span className="text-xs text-gray-500">
-                          {topicPosts.length} posts
+                          {postCounts[topic.slug] ?? 0} posts
                         </span>
                       </div>
                     </div>
@@ -140,27 +149,27 @@ export default function HomePage() {
                       />
                     </svg>
                   </div>
-                  {/* Recent post preview */}
-                  {topicPosts[0] && (
-                    <div
-                      className="rounded-lg p-3 border"
-                      style={{ backgroundColor: '#0a0a0f', borderColor: '#1f2937' }}
-                    >
-                      <p className="text-xs text-gray-500 mb-1">Latest post</p>
-                      <p className="text-sm text-gray-300 font-medium leading-snug line-clamp-2">
-                        {topicPosts[0].title}
-                      </p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="text-xs text-gray-600">
-                          {topicPosts[0].author}
-                        </span>
-                        <span className="text-xs text-gray-700">·</span>
-                        <span className="text-xs text-gray-600">
-                          {topicPosts[0].replies} replies
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  {/* Latest post preview */}
+                  <div
+                    className="rounded-lg p-3 border"
+                    style={{ backgroundColor: '#0a0a0f', borderColor: '#1f2937' }}
+                  >
+                    <p className="text-xs text-gray-500 mb-1">Latest post</p>
+                    {latestPost ? (
+                      <>
+                        <p className="text-sm text-gray-300 font-medium leading-snug line-clamp-2">
+                          {latestPost.title}
+                        </p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className="text-xs text-gray-600">
+                            {latestPost.profiles?.display_name ?? 'Unknown'}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-600">No posts yet</p>
+                    )}
+                  </div>
                 </div>
               </Link>
             )

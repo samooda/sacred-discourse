@@ -1,8 +1,9 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
+  const navigate = useNavigate()
   const { user, signOut } = useAuth()
 
   return (
@@ -48,7 +49,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {user ? (
               <button
-                onClick={signOut}
+                onClick={async () => { await signOut(); navigate('/') }}
                 className="px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-100 transition-colors rounded-md hover:bg-gray-800/60"
               >
                 Sign out
