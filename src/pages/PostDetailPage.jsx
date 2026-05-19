@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
@@ -65,6 +65,8 @@ export default function PostDetailPage() {
 
   const [replyLikes, setReplyLikes] = useState({})
   const [expandedReplies, setExpandedReplies] = useState(new Set())
+
+  const repliesEndRef = useRef(null)
 
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
@@ -211,6 +213,7 @@ export default function PostDetailPage() {
       setReplyText('')
       setSubmitting(false)
       setRepliesVersion((v) => v + 1)
+      repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -952,6 +955,95 @@ export default function PostDetailPage() {
           </span>
         </h2>
 
+        {/* Reply form — logged-in users only */}
+        {user ? (
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-400 mb-3">Add a reply</h3>
+            {postGone ? (
+              <div
+                className="rounded-lg px-4 py-3 mb-3 text-sm border"
+                style={{
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  color: '#fca5a5',
+                }}
+              >
+                <p className="mb-2">This post no longer exists. It may have been deleted.</p>
+                <Link
+                  to={`/topic/${topicSlug}`}
+                  className="underline underline-offset-2 transition-colors"
+                  style={{ color: '#fca5a5' }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = '#fca5a5')}
+                >
+                  Back to {topic.name}
+                </Link>
+              </div>
+            ) : replyError ? (
+              <div
+                className="rounded-lg px-4 py-3 mb-3 text-sm border"
+                style={{
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  color: '#fca5a5',
+                }}
+              >
+                {replyError}
+              </div>
+            ) : null}
+            <form onSubmit={handleReply}>
+              <textarea
+                required
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                className="w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none transition-colors text-gray-300 placeholder-gray-600"
+                style={{
+                  backgroundColor: '#0a0a0f',
+                  borderColor: '#2d3748',
+                  minHeight: '100px',
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                placeholder="Share your thoughts or scholarly perspective…"
+                maxLength={2000}
+              />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 2000 - replyText.length < 100 ? '#ef4444' : '#6b7280' }}
+              >
+                {2000 - replyText.length} / 2000
+              </p>
+              <div className="flex justify-end mt-3">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
+                  onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+                >
+                  {submitting ? 'Posting…' : 'Post reply'}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="mb-6">
+            <p className="text-sm text-gray-600">
+              <Link
+                to="/login"
+                className="transition-colors"
+                style={{ color: '#818cf8' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
+              >
+                Sign in
+              </Link>
+              {' '}to join the discussion.
+            </p>
+          </div>
+        )}
+
         {/* Replies fetch error */}
         {repliesError && (
           <div
@@ -968,7 +1060,7 @@ export default function PostDetailPage() {
 
         {/* Reply list */}
         {!repliesError && replies.length === 0 && (
-          <p className="text-gray-600 text-sm mb-6">
+          <p className="text-gray-600 text-sm">
             No replies yet. Be the first to respond.
           </p>
         )}
@@ -1055,101 +1147,7 @@ export default function PostDetailPage() {
             ))}
           </div>
         )}
-
-        {/* Reply form — logged-in users only */}
-        {user ? (
-          <div
-            className={replies.length > 0 ? 'mt-4 pt-5 border-t' : ''}
-            style={{ borderColor: '#1f2937' }}
-          >
-            <h3 className="text-sm font-medium text-gray-400 mb-3">Add a reply</h3>
-            {postGone ? (
-              <div
-                className="rounded-lg px-4 py-3 mb-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
-                <p className="mb-2">This post no longer exists. It may have been deleted.</p>
-                <Link
-                  to={`/topic/${topicSlug}`}
-                  className="underline underline-offset-2 transition-colors"
-                  style={{ color: '#fca5a5' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#fca5a5')}
-                >
-                  Back to {topic.name}
-                </Link>
-              </div>
-            ) : replyError ? (
-              <div
-                className="rounded-lg px-4 py-3 mb-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
-                {replyError}
-              </div>
-            ) : null}
-            <form onSubmit={handleReply}>
-              <textarea
-                required
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                className="w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none transition-colors text-gray-300 placeholder-gray-600"
-                style={{
-                  backgroundColor: '#0a0a0f',
-                  borderColor: '#2d3748',
-                  minHeight: '100px',
-                }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
-                placeholder="Share your thoughts or scholarly perspective…"
-                maxLength={2000}
-              />
-              <p
-                className="text-xs text-right mt-1"
-                style={{ color: 2000 - replyText.length < 100 ? '#ef4444' : '#6b7280' }}
-              >
-                {2000 - replyText.length} / 2000
-              </p>
-              <div className="flex justify-end mt-3">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                  onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-                >
-                  {submitting ? 'Posting…' : 'Post reply'}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <div
-            className={replies.length > 0 ? 'mt-4 pt-5 border-t' : ''}
-            style={{ borderColor: '#1f2937' }}
-          >
-            <p className="text-sm text-gray-600">
-              <Link
-                to="/login"
-                className="transition-colors"
-                style={{ color: '#818cf8' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
-              >
-                Sign in
-              </Link>
-              {' '}to join the discussion.
-            </p>
-          </div>
-        )}
+        <div ref={repliesEndRef} />
       </div>
 
       {/* Back link */}
