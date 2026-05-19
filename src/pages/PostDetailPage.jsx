@@ -64,6 +64,7 @@ export default function PostDetailPage() {
   const [postLikedByUser, setPostLikedByUser] = useState(false)
 
   const [replyLikes, setReplyLikes] = useState({})
+  const [deleteReplyErrors, setDeleteReplyErrors] = useState({})
   const [expandedReplies, setExpandedReplies] = useState(new Set())
 
   const repliesEndRef = useRef(null)
@@ -444,6 +445,31 @@ export default function PostDetailPage() {
         setPostLikedByUser(wasLiked)
         setPostLikeCount((c) => (wasLiked ? c + 1 : c - 1))
       }
+    }
+  }
+
+  async function deleteReply(replyId) {
+    const { error } = await supabase
+      .from('replies')
+      .delete()
+      .eq('id', replyId)
+
+    if (error) {
+      setDeleteReplyErrors((prev) => ({ ...prev, [replyId]: error.message }))
+      setTimeout(() => {
+        setDeleteReplyErrors((prev) => {
+          const next = { ...prev }
+          delete next[replyId]
+          return next
+        })
+      }, 3000)
+    } else {
+      setReplies((prev) => prev.filter((r) => r.id !== replyId))
+      setReplyLikes((prev) => {
+        const next = { ...prev }
+        delete next[replyId]
+        return next
+      })
     }
   }
 
@@ -1115,6 +1141,23 @@ export default function PostDetailPage() {
                     </svg>
                     <span className="text-xs">{replyLikes[reply.id]?.count ?? 0}</span>
                   </button>
+                  {(user?.id === reply.author_id || user?.id === post.author_id) && (
+                    <button
+                      type="button"
+                      onClick={() => deleteReply(reply.id)}
+                      className="text-xs font-medium transition-colors"
+                      style={{ color: '#f87171' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                    >
+                      Delete
+                    </button>
+                  )}
+                  {deleteReplyErrors[reply.id] && (
+                    <span className="text-xs" style={{ color: '#fca5a5' }}>
+                      {deleteReplyErrors[reply.id]}
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-400 text-sm leading-relaxed pl-10 break-all">
                   {reply.content.length > 300 ? (
