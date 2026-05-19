@@ -4,6 +4,11 @@ import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
+function formatFileSize(bytes) {
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  return (bytes / 1024).toFixed(1) + ' KB'
+}
+
 export default function TopicPage() {
   const { topicSlug } = useParams()
   const { user } = useAuth()
@@ -21,6 +26,7 @@ export default function TopicPage() {
   const [tags, setTags] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState([])
 
   // Moved fetch logic inside the effect so all its dependencies are in scope
   // and the eslint-plugin-react-hooks dep array is correct.
@@ -81,6 +87,16 @@ export default function TopicPage() {
       setSubmitting(false)
       setPostsVersion((v) => v + 1)
     }
+  }
+
+  function handleFileChange(e) {
+    const files = Array.from(e.target.files)
+    setSelectedFiles((prev) => [...prev, ...files])
+    e.target.value = ''
+  }
+
+  function removeFile(index) {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
   if (!topic) return <Navigate to="/" replace />
@@ -209,6 +225,52 @@ export default function TopicPage() {
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
                 placeholder="History, Theology, Ethics"
               />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                Attachments <span className="text-gray-600 font-normal">(optional)</span>
+              </label>
+              <label
+                className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
+                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+                <span>Choose files…</span>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,.gif,.pptx,.docx"
+                  onChange={handleFileChange}
+                  className="sr-only"
+                />
+              </label>
+              {selectedFiles.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {selectedFiles.map((file, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs border"
+                      style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                    >
+                      <span className="text-gray-300 truncate mr-2">{file.name}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-gray-600">{formatFileSize(file.size)}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(i)}
+                          className="text-gray-600 hover:text-gray-300 transition-colors leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div className="flex justify-end">
               <button
