@@ -27,6 +27,7 @@ export default function TopicPage() {
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
+  const [fileError, setFileError] = useState(null)
 
   // Moved fetch logic inside the effect so all its dependencies are in scope
   // and the eslint-plugin-react-hooks dep array is correct.
@@ -90,8 +91,30 @@ export default function TopicPage() {
   }
 
   function handleFileChange(e) {
+    setFileError(null)
     const files = Array.from(e.target.files)
-    setSelectedFiles((prev) => [...prev, ...files])
+    const allowedTypes = new Set([
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ])
+    const maxSize = 50 * 1024 * 1024
+    const errors = []
+    const valid = []
+    for (const file of files) {
+      if (file.size > maxSize) {
+        errors.push(`"${file.name}": exceeds the 50 MB size limit`)
+      } else if (!allowedTypes.has(file.type)) {
+        errors.push(`"${file.name}": file type not allowed`)
+      } else {
+        valid.push(file)
+      }
+    }
+    if (errors.length > 0) setFileError(errors.join('\n'))
+    if (valid.length > 0) setSelectedFiles((prev) => [...prev, ...valid])
     e.target.value = ''
   }
 
@@ -230,6 +253,19 @@ export default function TopicPage() {
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
                 Attachments <span className="text-gray-600 font-normal">(optional)</span>
               </label>
+              {fileError && (
+                <div
+                  className="rounded-lg px-4 py-3 mb-2 text-sm border"
+                  style={{
+                    backgroundColor: 'rgba(239,68,68,0.08)',
+                    borderColor: 'rgba(239,68,68,0.3)',
+                    color: '#fca5a5',
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {fileError}
+                </div>
+              )}
               <label
                 className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
