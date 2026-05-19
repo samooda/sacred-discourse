@@ -50,6 +50,16 @@ export default function PostDetailPage() {
   const [expandedAttachment, setExpandedAttachment] = useState(null)
   const [fullscreenImage, setFullscreenImage] = useState(null)
 
+  const [showEditForm, setShowEditForm] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editTags, setEditTags] = useState('')
+  const [editExistingAttachments, setEditExistingAttachments] = useState([])
+  const [editNewFiles, setEditNewFiles] = useState([])
+  const [editFileError, setEditFileError] = useState(null)
+  const [editSubmitting, setEditSubmitting] = useState(false)
+  const [editError, setEditError] = useState(null)
+
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
   // effect so that reloading replies after a new reply does not re-increment views.
@@ -184,6 +194,151 @@ export default function PostDetailPage() {
     }
   }
 
+  function openEditForm() {
+    setEditTitle(post.title)
+    setEditDescription(post.description)
+    setEditTags((post.tags || []).join(', '))
+    setEditExistingAttachments([...attachments])
+    setEditNewFiles([])
+    setEditFileError(null)
+    setShowEditForm(true)
+  }
+
+  function cancelEdit() {
+    setShowEditForm(false)
+    setEditTitle('')
+    setEditDescription('')
+    setEditTags('')
+    setEditExistingAttachments([])
+    setEditNewFiles([])
+    setEditFileError(null)
+  }
+
+  function handleEditFileChange(e) {
+    setEditFileError(null)
+    const files = Array.from(e.target.files)
+    const allowedTypes = new Set([
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ])
+    const maxSize = 50 * 1024 * 1024
+    const errors = []
+    const valid = []
+    for (const file of files) {
+      if (file.size > maxSize) {
+        errors.push(`"${file.name}": exceeds the 50 MB size limit`)
+      } else if (!allowedTypes.has(file.type)) {
+        errors.push(`"${file.name}": file type not allowed`)
+      } else {
+        valid.push(file)
+      }
+    }
+    if (errors.length > 0) setEditFileError(errors.join('\n'))
+    if (valid.length > 0) setEditNewFiles((prev) => [...prev, ...valid])
+    e.target.value = ''
+  }
+
+  async function handleSaveEdit() {
+    if (!editTitle.trim() || !editDescription.trim()) {
+      setEditError('Title and description are required.')
+      return
+    }
+
+    setEditError(null)
+    setEditSubmitting(true)
+
+    try {
+      // Upload any new files
+      const uploadedFiles = []
+      for (const file of editNewFiles) {
+        const path = `${topicSlug}/${Date.now()}_${file.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('post-attachments')
+          .upload(path, file)
+        if (uploadError) throw new Error(`"${file.name}": ${uploadError.message}`)
+        uploadedFiles.push({
+          file_name: file.name,
+          file_path: path,
+          file_size: file.size,
+          mime_type: file.type,
+        })
+      }
+
+      // Delete removed attachments from Storage and file_attachments table
+      const removedAttachments = attachments.filter(
+        (a) => !editExistingAttachments.some((ea) => ea.id === a.id)
+      )
+      if (removedAttachments.length > 0) {
+        await supabase.storage
+          .from('post-attachments')
+          .remove(removedAttachments.map((a) => a.file_path))
+        const { error: deleteRowsError } = await supabase
+          .from('file_attachments')
+          .delete()
+          .in('id', removedAttachments.map((a) => a.id))
+        if (deleteRowsError) throw new Error(deleteRowsError.message)
+      }
+
+      // Update the post row
+      const parsedTags = editTags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+      const { error: updateError } = await supabase
+        .from('posts')
+        .update({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          tags: parsedTags,
+          is_edited: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', postId)
+      if (updateError) throw new Error(updateError.message)
+
+      // Insert metadata rows for newly uploaded files
+      if (uploadedFiles.length > 0) {
+        const records = uploadedFiles.map((f) => ({
+          post_id: postId,
+          file_name: f.file_name,
+          file_path: f.file_path,
+          file_size: f.file_size,
+          mime_type: f.mime_type,
+        }))
+        const { error: insertError } = await supabase
+          .from('file_attachments')
+          .insert(records)
+        if (insertError) throw new Error(insertError.message)
+      }
+
+      // Update local post state
+      setPost((prev) => ({
+        ...prev,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        tags: parsedTags,
+        is_edited: true,
+      }))
+
+      // Reload attachments from Supabase
+      const { data: freshAttachments } = await supabase
+        .from('file_attachments')
+        .select('*')
+        .eq('post_id', postId)
+      setAttachments(freshAttachments || [])
+
+      cancelEdit()
+    } catch (err) {
+      setEditError(err.message)
+    } finally {
+      setEditSubmitting(false)
+    }
+  }
+
   if (!topic) return <Navigate to="/" replace />
   if (!loading && notFound) return <Navigate to={`/topic/${topicSlug}`} replace />
 
@@ -273,6 +428,9 @@ export default function PostDetailPage() {
                 day: 'numeric',
               })}
             </span>
+            {post.is_edited && (
+              <span className="text-xs text-gray-600">Edited</span>
+            )}
             <span>·</span>
             <span>{(post.views ?? 0) + 1} views</span>
             <span>·</span>
@@ -283,15 +441,26 @@ export default function PostDetailPage() {
           {user?.id === post.author_id && (
             <div className="mt-5 pt-5 border-t" style={{ borderColor: '#1f2937' }}>
               {!confirmDelete ? (
-                <button
-                  onClick={() => setConfirmDelete(true)}
-                  className="text-xs font-medium transition-colors"
-                  style={{ color: '#f87171' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
-                >
-                  Delete post
-                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={openEditForm}
+                    className="text-xs font-medium transition-colors"
+                    style={{ color: '#9ca3af' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e7eb')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                  >
+                    Edit post
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="text-xs font-medium transition-colors"
+                    style={{ color: '#f87171' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                  >
+                    Delete post
+                  </button>
+                </div>
               ) : (
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="text-xs text-gray-400">
@@ -333,125 +502,306 @@ export default function PostDetailPage() {
         className="rounded-xl border p-6 sm:p-8 mb-6"
         style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
       >
-        <p className="text-gray-300 leading-relaxed text-base mb-6">
-          {post.description}
-        </p>
+        {showEditForm ? (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-white">Edit post</h3>
 
-        {attachments.length > 0 && (
-          <div className="mt-6 pt-6 border-t" style={{ borderColor: '#1f2937' }}>
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-              Attachments
-            </h3>
-            <div className="space-y-2">
-              {attachments.map((attachment) => {
-                const icon = getFileIcon(attachment.mime_type)
-                const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/post-attachments/${attachment.file_path}`
-                return (
-                  <div key={attachment.id}>
-                    <div
-                      className="flex items-center gap-3 rounded-lg border px-4 py-3"
+            {/* Title */}
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">Title</label>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
+                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">Description</label>
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors resize-none"
+                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', minHeight: '120px' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+              />
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                Tags <span className="text-gray-600 font-normal">(comma-separated)</span>
+              </label>
+              <input
+                type="text"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
+                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                placeholder="History, Theology, Ethics"
+              />
+            </div>
+
+            {/* Existing attachments */}
+            {editExistingAttachments.length > 0 && (
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                  Existing attachments
+                </label>
+                <ul className="space-y-1">
+                  {editExistingAttachments.map((att) => (
+                    <li
+                      key={att.id}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs border"
                       style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
                     >
-                      <svg
-                        className="w-5 h-5 flex-shrink-0"
-                        style={{ color: icon.color }}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
-                      </svg>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
-                        <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
-                      </div>
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-                        style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#4f46e5'
-                          e.currentTarget.style.color = '#ffffff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#374151'
-                          e.currentTarget.style.color = '#9ca3af'
-                        }}
-                      >
-                        Download
-                      </a>
+                      <span className="text-gray-300 truncate mr-2">{att.file_name}</span>
                       <button
                         type="button"
                         onClick={() =>
-                          setExpandedAttachment(
-                            expandedAttachment === attachment.id ? null : attachment.id
-                          )
+                          setEditExistingAttachments((prev) => prev.filter((a) => a.id !== att.id))
                         }
-                        className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-                        style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#4f46e5'
-                          e.currentTarget.style.color = '#ffffff'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#374151'
-                          e.currentTarget.style.color = '#9ca3af'
-                        }}
+                        className="text-xs font-medium flex-shrink-0 transition-colors"
+                        style={{ color: '#f87171' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
                       >
-                        {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
+                        Remove
                       </button>
-                    </div>
-                    {expandedAttachment === attachment.id && (
-                      attachment.mime_type === 'application/pdf' ? (
-                        <div
-                          className="rounded-lg border overflow-hidden"
-                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* New file picker */}
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                Add attachments <span className="text-gray-600 font-normal">(optional)</span>
+              </label>
+              {editFileError && (
+                <div
+                  className="rounded-lg px-4 py-3 mb-2 text-sm border"
+                  style={{
+                    backgroundColor: 'rgba(239,68,68,0.08)',
+                    borderColor: 'rgba(239,68,68,0.3)',
+                    color: '#fca5a5',
+                    whiteSpace: 'pre-line',
+                  }}
+                >
+                  {editFileError}
+                </div>
+              )}
+              <label
+                className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
+                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                </svg>
+                <span>Choose files…</span>
+                <input
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,.gif,.pptx,.docx"
+                  onChange={handleEditFileChange}
+                  className="sr-only"
+                />
+              </label>
+              {editNewFiles.length > 0 && (
+                <ul className="mt-2 space-y-1">
+                  {editNewFiles.map((file, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs border"
+                      style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                    >
+                      <span className="text-gray-300 truncate mr-2">{file.name}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="text-gray-600">{formatFileSize(file.size)}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditNewFiles((prev) => prev.filter((_, idx) => idx !== i))
+                          }
+                          className="text-gray-600 hover:text-gray-300 transition-colors leading-none"
                         >
-                          <p className="text-xs text-gray-600 px-3 pt-2 pb-1">Loading PDF…</p>
-                          <iframe
-                            src={url}
-                            style={{ width: '100%', height: '500px', border: 'none' }}
-                          />
-                        </div>
-                      ) : attachment.mime_type.startsWith('image/') ? (
-                        <div
-                          className="rounded-lg border p-4"
-                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
-                        >
-                          <img
-                            src={url}
-                            alt={attachment.file_name}
-                            className="rounded-lg"
-                            style={{ maxWidth: '100%', height: 'auto', cursor: 'pointer' }}
-                            onClick={() => setFullscreenImage(url)}
-                          />
-                        </div>
-                      ) : attachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || attachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
-                        <div
-                          className="rounded-lg border overflow-hidden"
-                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
-                        >
-                          <iframe
-                            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
-                            style={{ width: '100%', height: '500px', border: 'none' }}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="rounded-lg border flex items-center justify-center"
-                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px', padding: '24px' }}
-                        >
-                          <p className="text-gray-600 text-sm">Preview not available for this file type</p>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )
-              })}
+                          ×
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Save / Cancel */}
+            {editError && (
+              <div
+                className="rounded-lg px-4 py-3 text-sm border"
+                style={{
+                  backgroundColor: 'rgba(239,68,68,0.08)',
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  color: '#fca5a5',
+                }}
+              >
+                {editError}
+              </div>
+            )}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={editSubmitting}
+                className="px-5 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
+                onMouseEnter={(e) => { if (!editSubmitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+              >
+                {editSubmitting ? 'Saving…' : 'Save changes'}
+              </button>
+              <button
+                type="button"
+                onClick={cancelEdit}
+                className="text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
+        ) : (
+          <>
+            <p className="text-gray-300 leading-relaxed text-base mb-6">
+              {post.description}
+            </p>
+
+            {attachments.length > 0 && (
+              <div className="mt-6 pt-6 border-t" style={{ borderColor: '#1f2937' }}>
+                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+                  Attachments
+                </h3>
+                <div className="space-y-2">
+                  {attachments.map((attachment) => {
+                    const icon = getFileIcon(attachment.mime_type)
+                    const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/post-attachments/${attachment.file_path}`
+                    return (
+                      <div key={attachment.id}>
+                        <div
+                          className="flex items-center gap-3 rounded-lg border px-4 py-3"
+                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                        >
+                          <svg
+                            className="w-5 h-5 flex-shrink-0"
+                            style={{ color: icon.color }}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
+                          </svg>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
+                            <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
+                          </div>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                            style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#4f46e5'
+                              e.currentTarget.style.color = '#ffffff'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#374151'
+                              e.currentTarget.style.color = '#9ca3af'
+                            }}
+                          >
+                            Download
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedAttachment(
+                                expandedAttachment === attachment.id ? null : attachment.id
+                              )
+                            }
+                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                            style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = '#4f46e5'
+                              e.currentTarget.style.color = '#ffffff'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = '#374151'
+                              e.currentTarget.style.color = '#9ca3af'
+                            }}
+                          >
+                            {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
+                          </button>
+                        </div>
+                        {expandedAttachment === attachment.id && (
+                          attachment.mime_type === 'application/pdf' ? (
+                            <div
+                              className="rounded-lg border overflow-hidden"
+                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                            >
+                              <p className="text-xs text-gray-600 px-3 pt-2 pb-1">Loading PDF…</p>
+                              <iframe
+                                src={url}
+                                style={{ width: '100%', height: '500px', border: 'none' }}
+                              />
+                            </div>
+                          ) : attachment.mime_type.startsWith('image/') ? (
+                            <div
+                              className="rounded-lg border p-4"
+                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                            >
+                              <img
+                                src={url}
+                                alt={attachment.file_name}
+                                className="rounded-lg"
+                                style={{ maxWidth: '100%', height: 'auto', cursor: 'pointer' }}
+                                onClick={() => setFullscreenImage(url)}
+                              />
+                            </div>
+                          ) : attachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || attachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
+                            <div
+                              className="rounded-lg border overflow-hidden"
+                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                            >
+                              <iframe
+                                src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+                                style={{ width: '100%', height: '500px', border: 'none' }}
+                              />
+                            </div>
+                          ) : (
+                            <div
+                              className="rounded-lg border flex items-center justify-center"
+                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px', padding: '24px' }}
+                            >
+                              <p className="text-gray-600 text-sm">Preview not available for this file type</p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
