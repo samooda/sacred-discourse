@@ -1082,7 +1082,14 @@ export default function PostDetailPage() {
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
                 placeholder="Share your thoughts or scholarly perspective…"
+                maxLength={2000}
               />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 2000 - replyText.length < 100 ? '#ef4444' : '#6b7280' }}
+              >
+                {2000 - replyText.length} / 2000
+              </p>
               <div className="flex justify-end mt-3">
                 <button
                   type="submit"
