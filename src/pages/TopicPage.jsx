@@ -60,6 +60,16 @@ export default function TopicPage() {
     fetchPosts()
   }, [topicSlug, postsVersion]) // postsVersion lets handleNewPost trigger a reload
 
+  useEffect(() => {
+    setShowForm(false)
+    setTitle('')
+    setDescription('')
+    setTags('')
+    setSelectedFiles([])
+    setFileError(null)
+    setFormError(null)
+  }, [topicSlug])
+
   async function handleNewPost(e) {
     e.preventDefault()
     setFormError(null)
