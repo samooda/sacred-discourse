@@ -60,6 +60,9 @@ export default function PostDetailPage() {
   const [editSubmitting, setEditSubmitting] = useState(false)
   const [editError, setEditError] = useState(null)
 
+  const [postLikeCount, setPostLikeCount] = useState(0)
+  const [postLikedByUser, setPostLikedByUser] = useState(false)
+
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
   // effect so that reloading replies after a new reply does not re-increment views.
@@ -137,6 +140,30 @@ export default function PostDetailPage() {
     }
     loadAttachments()
   }, [postId])
+
+  // Effect 4: fetch like count and whether the current user has liked this post.
+  useEffect(() => {
+    async function loadLikes() {
+      const { count } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('post_id', postId)
+      setPostLikeCount(count ?? 0)
+
+      if (user) {
+        const { data } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('post_id', postId)
+          .eq('user_id', user.id)
+          .maybeSingle()
+        setPostLikedByUser(!!data)
+      } else {
+        setPostLikedByUser(false)
+      }
+    }
+    loadLikes()
+  }, [postId, user])
 
   async function handleReply(e) {
     e.preventDefault()
@@ -339,6 +366,34 @@ export default function PostDetailPage() {
     }
   }
 
+  async function togglePostLike() {
+    if (!user) return
+
+    const wasLiked = postLikedByUser
+    setPostLikedByUser(!wasLiked)
+    setPostLikeCount((c) => (wasLiked ? c - 1 : c + 1))
+
+    if (wasLiked) {
+      const { error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('post_id', postId)
+        .eq('user_id', user.id)
+      if (error) {
+        setPostLikedByUser(wasLiked)
+        setPostLikeCount((c) => (wasLiked ? c + 1 : c - 1))
+      }
+    } else {
+      const { error } = await supabase
+        .from('likes')
+        .insert({ post_id: postId, user_id: user.id })
+      if (error) {
+        setPostLikedByUser(wasLiked)
+        setPostLikeCount((c) => (wasLiked ? c + 1 : c - 1))
+      }
+    }
+  }
+
   if (!topic) return <Navigate to="/" replace />
   if (!loading && notFound) return <Navigate to={`/topic/${topicSlug}`} replace />
 
@@ -435,6 +490,33 @@ export default function PostDetailPage() {
             <span>{(post.views ?? 0) + 1} views</span>
             <span>·</span>
             <span>{replies.length} replies</span>
+            <span>·</span>
+            <button
+              onClick={togglePostLike}
+              className="flex items-center gap-1.5 transition-colors"
+              style={{ color: postLikedByUser ? '#ef4444' : '#6b7280' }}
+              onMouseEnter={(e) => { if (!postLikedByUser) e.currentTarget.style.color = '#9ca3af' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = postLikedByUser ? '#ef4444' : '#6b7280' }}
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                {postLikedByUser ? (
+                  <path
+                    fill="currentColor"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                ) : (
+                  <path
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                )}
+              </svg>
+              <span>{postLikeCount}</span>
+            </button>
           </div>
 
           {/* Delete — visible to post author only */}
