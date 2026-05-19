@@ -123,6 +123,24 @@ export default function PostDetailPage() {
   async function handleDelete() {
     setDeleting(true)
     setDeleteError(null)
+
+    // Fetch Storage paths for any files attached to this post
+    const { data: attachments } = await supabase
+      .from('file_attachments')
+      .select('file_path')
+      .eq('post_id', postId)
+
+    // Delete files from Storage before removing the post row.
+    // A failure here is logged but does not block the post deletion.
+    if (attachments && attachments.length > 0) {
+      const { error: storageError } = await supabase.storage
+        .from('post-attachments')
+        .remove(attachments.map((a) => a.file_path))
+      if (storageError) {
+        console.error('Storage deletion failed:', storageError.message)
+      }
+    }
+
     const { error } = await supabase.from('posts').delete().eq('id', postId)
     if (error) {
       setDeleteError(error.message)
