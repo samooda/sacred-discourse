@@ -64,6 +64,7 @@ export default function PostDetailPage() {
   const [postLikedByUser, setPostLikedByUser] = useState(false)
 
   const [replyLikes, setReplyLikes] = useState({})
+  const [expandedReplies, setExpandedReplies] = useState(new Set())
 
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
@@ -1023,7 +1024,33 @@ export default function PostDetailPage() {
                     <span className="text-xs">{replyLikes[reply.id]?.count ?? 0}</span>
                   </button>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed pl-10">{reply.content}</p>
+                <p className="text-gray-400 text-sm leading-relaxed pl-10 break-all">
+                  {reply.content.length > 300 ? (
+                    <>
+                      {expandedReplies.has(reply.id)
+                        ? reply.content
+                        : reply.content.slice(0, 300) + '…'}
+                      {' '}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedReplies((prev) => {
+                            const next = new Set(prev)
+                            if (prev.has(reply.id)) next.delete(reply.id)
+                            else next.add(reply.id)
+                            return next
+                          })
+                        }
+                        className="text-xs font-medium transition-colors"
+                        style={{ color: '#818cf8' }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
+                      >
+                        {expandedReplies.has(reply.id) ? 'Show less' : 'Show more'}
+                      </button>
+                    </>
+                  ) : reply.content}
+                </p>
               </div>
             ))}
           </div>
