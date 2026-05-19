@@ -28,6 +28,7 @@ export default function TopicPage() {
   const [formError, setFormError] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [fileError, setFileError] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   // Moved fetch logic inside the effect so all its dependencies are in scope
   // and the eslint-plugin-react-hooks dep array is correct.
@@ -120,6 +121,29 @@ export default function TopicPage() {
 
   function removeFile(index) {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  async function uploadFiles(files) {
+    setUploading(true)
+    try {
+      const results = []
+      for (const file of files) {
+        const path = `${topicSlug}/${Date.now()}_${file.name}`
+        const { error } = await supabase.storage
+          .from('post-attachments')
+          .upload(path, file)
+        if (error) throw new Error(`"${file.name}": ${error.message}`)
+        results.push({
+          file_name: file.name,
+          file_path: path,
+          file_size: file.size,
+          mime_type: file.type,
+        })
+      }
+      return results
+    } finally {
+      setUploading(false)
+    }
   }
 
   if (!topic) return <Navigate to="/" replace />
