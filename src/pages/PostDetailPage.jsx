@@ -4,6 +4,23 @@ import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
+function formatFileSize(bytes) {
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+  return (bytes / 1024).toFixed(1) + ' KB'
+}
+
+function getFileIcon(mimeType) {
+  if (mimeType === 'application/pdf')
+    return { color: '#ef4444', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
+  if (mimeType.startsWith('image/'))
+    return { color: '#22c55e', path: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' }
+  if (mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
+    return { color: '#f97316', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
+  if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+    return { color: '#3b82f6', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
+  return { color: '#9ca3af', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
+}
+
 export default function PostDetailPage() {
   const { topicSlug, postId } = useParams()
   const navigate = useNavigate()
@@ -28,6 +45,8 @@ export default function PostDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+
+  const [attachments, setAttachments] = useState([])
 
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
@@ -94,6 +113,18 @@ export default function PostDetailPage() {
 
     loadReplies()
   }, [postId, topicSlug, repliesVersion])
+
+  // Effect 3: fetch file attachments for this post.
+  useEffect(() => {
+    async function loadAttachments() {
+      const { data } = await supabase
+        .from('file_attachments')
+        .select('*')
+        .eq('post_id', postId)
+      setAttachments(data || [])
+    }
+    loadAttachments()
+  }, [postId])
 
   async function handleReply(e) {
     e.preventDefault()
@@ -304,45 +335,57 @@ export default function PostDetailPage() {
           {post.description}
         </p>
 
-        {/* File attachment placeholder */}
-        <div
-          className="rounded-lg border-2 border-dashed p-8 text-center"
-          style={{ borderColor: '#2d3748' }}
-        >
-          <div className="flex flex-col items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: '#1e293b' }}
-            >
-              <svg
-                className="w-6 h-6"
-                style={{ color: '#475569' }}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
+        {attachments.length > 0 && (
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: '#1f2937' }}>
+            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+              Attachments
+            </h3>
+            <div className="space-y-2">
+              {attachments.map((attachment) => {
+                const icon = getFileIcon(attachment.mime_type)
+                const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/post-attachments/${attachment.file_path}`
+                return (
+                  <div
+                    key={attachment.id}
+                    className="flex items-center gap-3 rounded-lg border px-4 py-3"
+                    style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
+                  >
+                    <svg
+                      className="w-5 h-5 flex-shrink-0"
+                      style={{ color: icon.color }}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
+                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
+                      <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
+                    </div>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                      style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#4f46e5'
+                        e.currentTarget.style.color = '#ffffff'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#374151'
+                        e.currentTarget.style.color = '#9ca3af'
+                      }}
+                    >
+                      Download
+                    </a>
+                  </div>
+                )
+              })}
             </div>
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Attached resources</p>
-              <p className="text-gray-700 text-xs mt-1">
-                File attachments will appear here (PDFs, images, documents)
-              </p>
-            </div>
-            <button
-              className="mt-1 px-4 py-1.5 rounded-lg text-xs font-medium border transition-colors text-gray-500 hover:text-gray-300"
-              style={{ borderColor: '#2d3748', backgroundColor: 'transparent' }}
-            >
-              Upload file
-            </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Replies section */}
