@@ -63,6 +63,8 @@ export default function PostDetailPage() {
   const [postLikeCount, setPostLikeCount] = useState(0)
   const [postLikedByUser, setPostLikedByUser] = useState(false)
 
+  const [replyLikes, setReplyLikes] = useState({})
+
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
   // effect so that reloading replies after a new reply does not re-increment views.
@@ -104,7 +106,7 @@ export default function PostDetailPage() {
     loadPost()
   }, [postId, topicSlug])
 
-  // Effect 2: fetch replies.
+  // Effect 2: fetch replies and their like counts.
   // repliesVersion is incremented by handleReply to reload after a new reply
   // without triggering Effect 1.
   useEffect(() => {
@@ -122,7 +124,28 @@ export default function PostDetailPage() {
       if (error) {
         setRepliesError(error.message)
       } else {
-        setReplies(data || [])
+        const replyData = data || []
+        setReplies(replyData)
+
+        if (replyData.length > 0) {
+          const ids = replyData.map((r) => r.id)
+          const { data: likesData } = await supabase
+            .from('likes')
+            .select('reply_id, user_id')
+            .in('reply_id', ids)
+
+          const likesMap = {}
+          for (const id of ids) likesMap[id] = { count: 0, likedByUser: false }
+          for (const like of (likesData || [])) {
+            if (likesMap[like.reply_id]) {
+              likesMap[like.reply_id].count++
+              if (user && like.user_id === user.id) likesMap[like.reply_id].likedByUser = true
+            }
+          }
+          setReplyLikes(likesMap)
+        } else {
+          setReplyLikes({})
+        }
       }
     }
 
@@ -363,6 +386,32 @@ export default function PostDetailPage() {
       setEditError(err.message)
     } finally {
       setEditSubmitting(false)
+    }
+  }
+
+  async function toggleReplyLike(replyId) {
+    if (!user) return
+
+    const current = replyLikes[replyId] ?? { count: 0, likedByUser: false }
+    const wasLiked = current.likedByUser
+
+    setReplyLikes((prev) => ({
+      ...prev,
+      [replyId]: { count: wasLiked ? current.count - 1 : current.count + 1, likedByUser: !wasLiked },
+    }))
+
+    if (wasLiked) {
+      const { error } = await supabase
+        .from('likes')
+        .delete()
+        .eq('reply_id', replyId)
+        .eq('user_id', user.id)
+      if (error) setReplyLikes((prev) => ({ ...prev, [replyId]: current }))
+    } else {
+      const { error } = await supabase
+        .from('likes')
+        .insert({ reply_id: replyId, user_id: user.id })
+      if (error) setReplyLikes((prev) => ({ ...prev, [replyId]: current }))
     }
   }
 
@@ -947,6 +996,32 @@ export default function PostDetailPage() {
                       day: 'numeric',
                     })}
                   </span>
+                  <button
+                    onClick={() => toggleReplyLike(reply.id)}
+                    className="ml-auto flex items-center gap-1.5 transition-colors"
+                    style={{ color: replyLikes[reply.id]?.likedByUser ? '#ef4444' : '#6b7280' }}
+                    onMouseEnter={(e) => { if (!replyLikes[reply.id]?.likedByUser) e.currentTarget.style.color = '#9ca3af' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = replyLikes[reply.id]?.likedByUser ? '#ef4444' : '#6b7280' }}
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                      {replyLikes[reply.id]?.likedByUser ? (
+                        <path
+                          fill="currentColor"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      ) : (
+                        <path
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
+                      )}
+                    </svg>
+                    <span className="text-xs">{replyLikes[reply.id]?.count ?? 0}</span>
+                  </button>
                 </div>
                 <p className="text-gray-400 text-sm leading-relaxed pl-10">{reply.content}</p>
               </div>
