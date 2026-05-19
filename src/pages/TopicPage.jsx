@@ -70,25 +70,78 @@ export default function TopicPage() {
       .map((t) => t.trim())
       .filter(Boolean)
 
-    const { error } = await supabase.from('posts').insert({
-      title,
-      description,
-      topic_slug: topicSlug,
-      author_id: user.id,
-      tags: parsedTags,
-    })
-
-    if (error) {
-      setFormError(error.message)
-      setSubmitting(false)
-    } else {
-      setTitle('')
-      setDescription('')
-      setTags('')
-      setShowForm(false)
-      setSubmitting(false)
-      setPostsVersion((v) => v + 1)
+    if (selectedFiles.length === 0) {
+      const { error } = await supabase.from('posts').insert({
+        title,
+        description,
+        topic_slug: topicSlug,
+        author_id: user.id,
+        tags: parsedTags,
+      })
+      if (error) {
+        setFormError(error.message)
+        setSubmitting(false)
+      } else {
+        setTitle('')
+        setDescription('')
+        setTags('')
+        setShowForm(false)
+        setSubmitting(false)
+        setPostsVersion((v) => v + 1)
+      }
+      return
     }
+
+    // Upload files first
+    let uploadedFiles = []
+    try {
+      uploadedFiles = await uploadFiles(selectedFiles)
+    } catch (uploadErr) {
+      setFormError(uploadErr.message)
+      setSubmitting(false)
+      return
+    }
+
+    // Insert post and retrieve its id
+    const { data: postData, error: postError } = await supabase
+      .from('posts')
+      .insert({
+        title,
+        description,
+        topic_slug: topicSlug,
+        author_id: user.id,
+        tags: parsedTags,
+      })
+      .select('id')
+      .single()
+
+    if (postError) {
+      // Clean up already-uploaded files to avoid orphans in Storage
+      await supabase.storage
+        .from('post-attachments')
+        .remove(uploadedFiles.map((f) => f.file_path))
+      setFormError(postError.message)
+      setSubmitting(false)
+      return
+    }
+
+    // Save file metadata to file_attachments table
+    try {
+      await saveFileAttachments(postData.id, uploadedFiles)
+    } catch (saveErr) {
+      setFormError(saveErr.message)
+      setSubmitting(false)
+      return
+    }
+
+    // Full success
+    setTitle('')
+    setDescription('')
+    setTags('')
+    setSelectedFiles([])
+    setShowForm(false)
+    setSubmitting(false)
+    setPostsVersion((v) => v + 1)
   }
 
   function handleFileChange(e) {
@@ -144,6 +197,18 @@ export default function TopicPage() {
     } finally {
       setUploading(false)
     }
+  }
+
+  async function saveFileAttachments(postId, uploadedFiles) {
+    const records = uploadedFiles.map((f) => ({
+      post_id: postId,
+      file_name: f.file_name,
+      file_path: f.file_path,
+      file_size: f.file_size,
+      mime_type: f.mime_type,
+    }))
+    const { error } = await supabase.from('file_attachments').insert(records)
+    if (error) throw new Error(error.message)
   }
 
   if (!topic) return <Navigate to="/" replace />
