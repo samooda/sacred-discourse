@@ -539,7 +539,7 @@ export default function PostDetailPage() {
           </div>
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 break-words">
             {post.title}
           </h1>
 
@@ -678,7 +678,14 @@ export default function PostDetailPage() {
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                maxLength={100}
               />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 100 - editTitle.length < 20 ? '#ef4444' : '#6b7280' }}
+              >
+                {100 - editTitle.length} / 100
+              </p>
             </div>
 
             {/* Description */}
@@ -691,7 +698,14 @@ export default function PostDetailPage() {
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', minHeight: '120px' }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                maxLength={750}
               />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 750 - editDescription.length < 75 ? '#ef4444' : '#6b7280' }}
+              >
+                {750 - editDescription.length} / 750
+              </p>
             </div>
 
             {/* Tags */}
@@ -842,7 +856,7 @@ export default function PostDetailPage() {
           </div>
         ) : (
           <>
-            <p className="text-gray-300 leading-relaxed text-base mb-6">
+            <p className="text-gray-300 leading-relaxed text-base mb-6 break-words">
               {post.description}
             </p>
 

@@ -315,7 +315,14 @@ export default function TopicPage() {
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
                 placeholder="What do you want to discuss?"
+                maxLength={100}
               />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 100 - title.length < 20 ? '#ef4444' : '#6b7280' }}
+              >
+                {100 - title.length} / 100
+              </p>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
@@ -330,7 +337,14 @@ export default function TopicPage() {
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
                 onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
                 placeholder="Provide context, background, or your argument…"
+                maxLength={750}
               />
+              <p
+                className="text-xs text-right mt-1"
+                style={{ color: 750 - description.length < 75 ? '#ef4444' : '#6b7280' }}
+              >
+                {750 - description.length} / 750
+              </p>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
@@ -514,12 +528,9 @@ export default function TopicPage() {
 
                 {/* Main content */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors">
+                  <h3 className="font-semibold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors break-words">
                     {post.title}
                   </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 mb-3">
-                    {post.description}
-                  </p>
                   <div className="flex flex-wrap items-center gap-2">
                     {(post.tags || []).map((tag) => (
                       <span
