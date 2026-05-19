@@ -47,6 +47,8 @@ export default function PostDetailPage() {
   const [deleteError, setDeleteError] = useState(null)
 
   const [attachments, setAttachments] = useState([])
+  const [expandedAttachment, setExpandedAttachment] = useState(null)
+  const [fullscreenImage, setFullscreenImage] = useState(null)
 
   // Effect 1: fetch the post and increment views.
   // Runs when postId or topicSlug changes. Kept separate from the replies
@@ -345,41 +347,106 @@ export default function PostDetailPage() {
                 const icon = getFileIcon(attachment.mime_type)
                 const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/post-attachments/${attachment.file_path}`
                 return (
-                  <div
-                    key={attachment.id}
-                    className="flex items-center gap-3 rounded-lg border px-4 py-3"
-                    style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                  >
-                    <svg
-                      className="w-5 h-5 flex-shrink-0"
-                      style={{ color: icon.color }}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div key={attachment.id}>
+                    <div
+                      className="flex items-center gap-3 rounded-lg border px-4 py-3"
+                      style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
-                    </svg>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
-                      <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
+                      <svg
+                        className="w-5 h-5 flex-shrink-0"
+                        style={{ color: icon.color }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
+                        <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
+                      </div>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                        style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#4f46e5'
+                          e.currentTarget.style.color = '#ffffff'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#374151'
+                          e.currentTarget.style.color = '#9ca3af'
+                        }}
+                      >
+                        Download
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedAttachment(
+                            expandedAttachment === attachment.id ? null : attachment.id
+                          )
+                        }
+                        className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                        style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#4f46e5'
+                          e.currentTarget.style.color = '#ffffff'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#374151'
+                          e.currentTarget.style.color = '#9ca3af'
+                        }}
+                      >
+                        {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
+                      </button>
                     </div>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-                      style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = '#4f46e5'
-                        e.currentTarget.style.color = '#ffffff'
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = '#374151'
-                        e.currentTarget.style.color = '#9ca3af'
-                      }}
-                    >
-                      Download
-                    </a>
+                    {expandedAttachment === attachment.id && (
+                      attachment.mime_type === 'application/pdf' ? (
+                        <div
+                          className="rounded-lg border overflow-hidden"
+                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                        >
+                          <p className="text-xs text-gray-600 px-3 pt-2 pb-1">Loading PDF…</p>
+                          <iframe
+                            src={url}
+                            style={{ width: '100%', height: '500px', border: 'none' }}
+                          />
+                        </div>
+                      ) : attachment.mime_type.startsWith('image/') ? (
+                        <div
+                          className="rounded-lg border p-4"
+                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                        >
+                          <img
+                            src={url}
+                            alt={attachment.file_name}
+                            className="rounded-lg"
+                            style={{ maxWidth: '100%', height: 'auto', cursor: 'pointer' }}
+                            onClick={() => setFullscreenImage(url)}
+                          />
+                        </div>
+                      ) : attachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || attachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
+                        <div
+                          className="rounded-lg border overflow-hidden"
+                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
+                        >
+                          <iframe
+                            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
+                            style={{ width: '100%', height: '500px', border: 'none' }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="rounded-lg border flex items-center justify-center"
+                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px', padding: '24px' }}
+                        >
+                          <p className="text-gray-600 text-sm">Preview not available for this file type</p>
+                        </div>
+                      )
+                    )}
                   </div>
                 )
               })}
@@ -554,6 +621,28 @@ export default function PostDetailPage() {
         </svg>
         Back to {topic.name}
       </Link>
+
+      {/* Fullscreen image modal */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 text-white text-3xl font-light leading-none hover:text-gray-300 transition-colors"
+          >
+            ×
+          </button>
+          <img
+            src={fullscreenImage}
+            alt=""
+            style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </main>
   )
 }
