@@ -1,5 +1,4 @@
 node_modules
 .env
 dist
-CONTEXT.md
-REFACTOR_PLAN.md
+private
