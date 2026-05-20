@@ -175,17 +175,6 @@ export default function SignupPage() {
             </button>
           </form>
 
-          <p className="text-center text-xs text-gray-700 mt-4 leading-relaxed">
-            By creating an account you agree to our{' '}
-            <button type="button" className="text-gray-500 hover:text-gray-400 transition-colors underline underline-offset-2">
-              Terms of Service
-            </button>{' '}
-            and{' '}
-            <button type="button" className="text-gray-500 hover:text-gray-400 transition-colors underline underline-offset-2">
-              Community Guidelines
-            </button>
-            .
-          </p>
         </div>
 
         <p className="text-center text-sm text-gray-600 mt-5">
