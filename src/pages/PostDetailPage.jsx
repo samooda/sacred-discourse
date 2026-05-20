@@ -3,6 +3,9 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import ErrorBanner from '../components/ErrorBanner'
+import LoadingSpinner from '../components/LoadingSpinner'
+import PrimaryButton from '../components/PrimaryButton'
 import { formatFileSize, formatDate } from '../utils/format'
 import { validateFiles } from '../utils/fileValidation'
 import { getFileIcon } from '../utils/fileIcons'
@@ -437,10 +440,7 @@ export default function PostDetailPage() {
     return (
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="py-24 text-center">
-          <div
-            className="inline-block w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: topic.accentColor, borderTopColor: 'transparent' }}
-          />
+          <LoadingSpinner color={topic.accentColor} />
           <p className="text-gray-600 text-sm mt-3">Loading post…</p>
         </div>
       </main>
@@ -684,19 +684,7 @@ export default function PostDetailPage() {
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
                 Add attachments <span className="text-gray-600 font-normal">(optional)</span>
               </label>
-              {editFileError && (
-                <div
-                  className="rounded-lg px-4 py-3 mb-2 text-sm border"
-                  style={{
-                    backgroundColor: 'rgba(239,68,68,0.08)',
-                    borderColor: 'rgba(239,68,68,0.3)',
-                    color: '#fca5a5',
-                    whiteSpace: 'pre-line',
-                  }}
-                >
-                  {editFileError}
-                </div>
-              )}
+              {editFileError && <ErrorBanner preWrap className="mb-2">{editFileError}</ErrorBanner>}
               <label
                 className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
@@ -743,30 +731,11 @@ export default function PostDetailPage() {
             </div>
 
             {/* Save / Cancel */}
-            {editError && (
-              <div
-                className="rounded-lg px-4 py-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
-                {editError}
-              </div>
-            )}
+            {editError && <ErrorBanner>{editError}</ErrorBanner>}
             <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleSaveEdit}
-                disabled={editSubmitting}
-                className="px-5 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                onMouseEnter={(e) => { if (!editSubmitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-              >
+              <PrimaryButton type="button" onClick={handleSaveEdit} loading={editSubmitting} className="px-5 py-2">
                 {editSubmitting ? 'Saving…' : 'Save changes'}
-              </button>
+              </PrimaryButton>
               <button
                 type="button"
                 onClick={cancelEdit}
@@ -922,14 +891,7 @@ export default function PostDetailPage() {
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-400 mb-3">Add a reply</h3>
             {postGone ? (
-              <div
-                className="rounded-lg px-4 py-3 mb-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
+              <ErrorBanner className="mb-3">
                 <p className="mb-2">This post no longer exists. It may have been deleted.</p>
                 <Link
                   to={`/topic/${topicSlug}`}
@@ -940,18 +902,9 @@ export default function PostDetailPage() {
                 >
                   Back to {topic.name}
                 </Link>
-              </div>
+              </ErrorBanner>
             ) : replyError ? (
-              <div
-                className="rounded-lg px-4 py-3 mb-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
-                {replyError}
-              </div>
+              <ErrorBanner className="mb-3">{replyError}</ErrorBanner>
             ) : null}
             <form onSubmit={handleReply}>
               <textarea
@@ -976,16 +929,9 @@ export default function PostDetailPage() {
                 {2000 - replyText.length} / 2000
               </p>
               <div className="flex justify-end mt-3">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                  onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-                >
+                <PrimaryButton type="submit" loading={submitting} className="px-4 py-2">
                   {submitting ? 'Posting…' : 'Post reply'}
-                </button>
+                </PrimaryButton>
               </div>
             </form>
           </div>
@@ -1008,16 +954,7 @@ export default function PostDetailPage() {
 
         {/* Replies fetch error */}
         {repliesError && (
-          <div
-            className="rounded-lg px-4 py-3 mb-4 text-sm border"
-            style={{
-              backgroundColor: 'rgba(239,68,68,0.08)',
-              borderColor: 'rgba(239,68,68,0.3)',
-              color: '#fca5a5',
-            }}
-          >
-            Failed to load replies: {repliesError}
-          </div>
+          <ErrorBanner className="mb-4">Failed to load replies: {repliesError}</ErrorBanner>
         )}
 
         {/* Reply list */}

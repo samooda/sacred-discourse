@@ -4,6 +4,9 @@ import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import PostCard from '../components/PostCard'
+import ErrorBanner from '../components/ErrorBanner'
+import LoadingSpinner from '../components/LoadingSpinner'
+import PrimaryButton from '../components/PrimaryButton'
 import { formatFileSize } from '../utils/format'
 import { validateFiles } from '../utils/fileValidation'
 
@@ -256,18 +259,7 @@ export default function TopicPage() {
           style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
         >
           <h3 className="text-sm font-semibold text-white mb-4">New discussion</h3>
-          {formError && (
-            <div
-              className="rounded-lg px-4 py-3 mb-4 text-sm border"
-              style={{
-                backgroundColor: 'rgba(239,68,68,0.08)',
-                borderColor: 'rgba(239,68,68,0.3)',
-                color: '#fca5a5',
-              }}
-            >
-              {formError}
-            </div>
-          )}
+          {formError && <ErrorBanner className="mb-4">{formError}</ErrorBanner>}
           <form onSubmit={handleNewPost} className="space-y-4">
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
@@ -318,19 +310,7 @@ export default function TopicPage() {
               <label className="block text-xs font-medium text-gray-400 mb-1.5">
                 Attachments <span className="text-gray-600 font-normal">(optional)</span>
               </label>
-              {fileError && (
-                <div
-                  className="rounded-lg px-4 py-3 mb-2 text-sm border"
-                  style={{
-                    backgroundColor: 'rgba(239,68,68,0.08)',
-                    borderColor: 'rgba(239,68,68,0.3)',
-                    color: '#fca5a5',
-                    whiteSpace: 'pre-line',
-                  }}
-                >
-                  {fileError}
-                </div>
-              )}
+              {fileError && <ErrorBanner preWrap className="mb-2">{fileError}</ErrorBanner>}
               <label
                 className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
@@ -374,16 +354,9 @@ export default function TopicPage() {
               )}
             </div>
             <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-5 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                onMouseEnter={(e) => { if (!submitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-              >
+              <PrimaryButton type="submit" loading={submitting} className="px-5 py-2">
                 {submitting ? 'Posting…' : 'Post discussion'}
-              </button>
+              </PrimaryButton>
             </div>
           </form>
         </div>
@@ -392,10 +365,7 @@ export default function TopicPage() {
       {/* Loading state */}
       {postsLoading && (
         <div className="py-16 text-center">
-          <div
-            className="inline-block w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: topic.accentColor, borderTopColor: 'transparent' }}
-          />
+          <LoadingSpinner color={topic.accentColor} />
           <p className="text-gray-600 text-sm mt-3">Loading discussions…</p>
         </div>
       )}

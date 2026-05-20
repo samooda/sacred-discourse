@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import PostCard from '../components/PostCard'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams()
@@ -68,10 +69,7 @@ export default function SearchPage() {
 
       {loading && (
         <div className="py-16 text-center">
-          <div
-            className="inline-block w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: '#4f46e5', borderTopColor: 'transparent' }}
-          />
+          <LoadingSpinner />
           <p className="text-gray-600 text-sm mt-3">Searching…</p>
         </div>
       )}

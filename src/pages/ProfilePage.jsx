@@ -4,6 +4,9 @@ import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import PostCard from '../components/PostCard'
+import ErrorBanner from '../components/ErrorBanner'
+import LoadingSpinner from '../components/LoadingSpinner'
+import PrimaryButton from '../components/PrimaryButton'
 
 export default function ProfilePage() {
   const { userId } = useParams()
@@ -157,10 +160,7 @@ export default function ProfilePage() {
     return (
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="py-16 text-center">
-          <div
-            className="inline-block w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: '#4f46e5', borderTopColor: 'transparent' }}
-          />
+          <LoadingSpinner />
           <p className="text-gray-600 text-sm mt-3">Loading profile…</p>
         </div>
       </main>
@@ -235,18 +235,7 @@ export default function ProfilePage() {
                 </div>
                 <span className="text-xs text-gray-600">Preview</span>
               </div>
-              {editFileError && (
-                <div
-                  className="rounded-lg px-4 py-3 mb-2 text-sm border"
-                  style={{
-                    backgroundColor: 'rgba(239,68,68,0.08)',
-                    borderColor: 'rgba(239,68,68,0.3)',
-                    color: '#fca5a5',
-                  }}
-                >
-                  {editFileError}
-                </div>
-              )}
+              {editFileError && <ErrorBanner className="mb-2">{editFileError}</ErrorBanner>}
               <label
                 className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
@@ -266,18 +255,7 @@ export default function ProfilePage() {
               </label>
               <p className="text-xs text-gray-600 mt-1.5">JPEG, PNG, GIF, or WebP. Max 5 MB.</p>
             </div>
-            {editError && (
-              <div
-                className="rounded-lg px-4 py-3 text-sm border"
-                style={{
-                  backgroundColor: 'rgba(239,68,68,0.08)',
-                  borderColor: 'rgba(239,68,68,0.3)',
-                  color: '#fca5a5',
-                }}
-              >
-                {editError}
-              </div>
-            )}
+            {editError && <ErrorBanner>{editError}</ErrorBanner>}
             <div className="flex justify-end gap-2">
               <button
                 type="button"
@@ -287,16 +265,9 @@ export default function ProfilePage() {
               >
                 Cancel
               </button>
-              <button
-                type="submit"
-                disabled={editSubmitting}
-                className="px-5 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                onMouseEnter={(e) => { if (!editSubmitting) e.currentTarget.style.backgroundColor = '#4338ca' }}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
-              >
+              <PrimaryButton type="submit" loading={editSubmitting} className="px-5 py-2">
                 {editSubmitting ? 'Saving…' : 'Save'}
-              </button>
+              </PrimaryButton>
             </div>
           </form>
         </div>
@@ -305,10 +276,7 @@ export default function ProfilePage() {
       {/* Posts */}
       {postsLoading && (
         <div className="py-16 text-center">
-          <div
-            className="inline-block w-6 h-6 rounded-full border-2 animate-spin"
-            style={{ borderColor: '#4f46e5', borderTopColor: 'transparent' }}
-          />
+          <LoadingSpinner />
           <p className="text-gray-600 text-sm mt-3">Loading posts…</p>
         </div>
       )}
