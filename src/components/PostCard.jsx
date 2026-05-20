@@ -43,19 +43,6 @@ export default function PostCard({ post, topicSlug }) {
             {post.title}
           </h3>
           <div className="flex flex-wrap items-center gap-2">
-            {(post.tags || []).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 rounded text-xs border"
-                style={{
-                  backgroundColor: accentColor + '11',
-                  borderColor: accentColor + '33',
-                  color: accentColor,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
             <span className="text-xs text-gray-600 ml-auto">
               by{' '}
               <Link

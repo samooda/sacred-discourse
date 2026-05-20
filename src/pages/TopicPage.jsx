@@ -24,7 +24,6 @@ export default function TopicPage() {
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [tags, setTags] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
@@ -43,7 +42,7 @@ export default function TopicPage() {
       const { data, error } = await supabase
         .from('posts')
         .select(`
-          id, title, description, tags, views, created_at, author_id,
+          id, title, description, views, created_at, author_id,
           profiles ( display_name ),
           replies ( id )
         `)
@@ -65,7 +64,6 @@ export default function TopicPage() {
     setShowForm(false)
     setTitle('')
     setDescription('')
-    setTags('')
     setSelectedFiles([])
     setFileError(null)
     setFormError(null)
@@ -76,18 +74,12 @@ export default function TopicPage() {
     setFormError(null)
     setSubmitting(true)
 
-    const parsedTags = tags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean)
-
     if (selectedFiles.length === 0) {
       const { error } = await supabase.from('posts').insert({
         title,
         description,
         topic_slug: topicSlug,
         author_id: user.id,
-        tags: parsedTags,
       })
       if (error) {
         setFormError(error.message)
@@ -95,7 +87,6 @@ export default function TopicPage() {
       } else {
         setTitle('')
         setDescription('')
-        setTags('')
         setShowForm(false)
         setSubmitting(false)
         setPostsVersion((v) => v + 1)
@@ -121,7 +112,6 @@ export default function TopicPage() {
         description,
         topic_slug: topicSlug,
         author_id: user.id,
-        tags: parsedTags,
       })
       .select('id')
       .single()
@@ -148,7 +138,6 @@ export default function TopicPage() {
     // Full success
     setTitle('')
     setDescription('')
-    setTags('')
     setSelectedFiles([])
     setShowForm(false)
     setSubmitting(false)
@@ -346,22 +335,6 @@ export default function TopicPage() {
               >
                 {750 - description.length} / 750
               </p>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                Tags{' '}
-                <span className="text-gray-600 font-normal">(comma-separated)</span>
-              </label>
-              <input
-                type="text"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
-                placeholder="History, Theology, Ethics"
-              />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">

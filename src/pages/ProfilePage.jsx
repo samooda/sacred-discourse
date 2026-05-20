@@ -50,7 +50,7 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from('posts')
         .select(`
-          id, title, tags, views, topic_slug, created_at, author_id,
+          id, title, views, topic_slug, created_at, author_id,
           profiles ( display_name ),
           replies ( id )
         `)

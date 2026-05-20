@@ -8,7 +8,6 @@ export const topics = [
     gradientFrom: '#1e3a5f',
     gradientTo: '#1e40af',
     accentColor: '#3b82f6',
-    badgeClass: 'bg-blue-900 text-blue-300 border border-blue-800',
   },
   {
     slug: 'islam',
@@ -19,7 +18,6 @@ export const topics = [
     gradientFrom: '#14532d',
     gradientTo: '#15803d',
     accentColor: '#22c55e',
-    badgeClass: 'bg-green-900 text-green-300 border border-green-800',
   },
   {
     slug: 'judaism',
@@ -30,7 +28,6 @@ export const topics = [
     gradientFrom: '#1e1b4b',
     gradientTo: '#3730a3',
     accentColor: '#818cf8',
-    badgeClass: 'bg-indigo-900 text-indigo-300 border border-indigo-800',
   },
   {
     slug: 'atheism',
@@ -41,6 +38,5 @@ export const topics = [
     gradientFrom: '#1c1c2e',
     gradientTo: '#374151',
     accentColor: '#9ca3af',
-    badgeClass: 'bg-gray-800 text-gray-300 border border-gray-700',
   },
 ]

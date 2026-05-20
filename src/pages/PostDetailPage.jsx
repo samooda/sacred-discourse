@@ -53,7 +53,6 @@ export default function PostDetailPage() {
   const [showEditForm, setShowEditForm] = useState(false)
   const [editTitle, setEditTitle] = useState('')
   const [editDescription, setEditDescription] = useState('')
-  const [editTags, setEditTags] = useState('')
   const [editExistingAttachments, setEditExistingAttachments] = useState([])
   const [editNewFiles, setEditNewFiles] = useState([])
   const [editFileError, setEditFileError] = useState(null)
@@ -252,7 +251,6 @@ export default function PostDetailPage() {
   function openEditForm() {
     setEditTitle(post.title)
     setEditDescription(post.description)
-    setEditTags((post.tags || []).join(', '))
     setEditExistingAttachments([...attachments])
     setEditNewFiles([])
     setEditFileError(null)
@@ -263,7 +261,6 @@ export default function PostDetailPage() {
     setShowEditForm(false)
     setEditTitle('')
     setEditDescription('')
-    setEditTags('')
     setEditExistingAttachments([])
     setEditNewFiles([])
     setEditFileError(null)
@@ -339,16 +336,11 @@ export default function PostDetailPage() {
       }
 
       // Update the post row
-      const parsedTags = editTags
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
       const { error: updateError } = await supabase
         .from('posts')
         .update({
           title: editTitle.trim(),
           description: editDescription.trim(),
-          tags: parsedTags,
           is_edited: true,
           updated_at: new Date().toISOString(),
         })
@@ -375,7 +367,6 @@ export default function PostDetailPage() {
         ...prev,
         title: editTitle.trim(),
         description: editDescription.trim(),
-        tags: parsedTags,
         is_edited: true,
       }))
 
@@ -521,23 +512,6 @@ export default function PostDetailPage() {
           }}
         />
         <div className="p-6 sm:p-8">
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {(post.tags || []).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 rounded text-xs border"
-                style={{
-                  backgroundColor: topic.accentColor + '11',
-                  borderColor: topic.accentColor + '33',
-                  color: topic.accentColor,
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 break-words">
             {post.title}
@@ -711,23 +685,6 @@ export default function PostDetailPage() {
               >
                 {750 - editDescription.length} / 750
               </p>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                Tags <span className="text-gray-600 font-normal">(comma-separated)</span>
-              </label>
-              <input
-                type="text"
-                value={editTags}
-                onChange={(e) => setEditTags(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
-                placeholder="History, Theology, Ethics"
-              />
             </div>
 
             {/* Existing attachments */}
