@@ -18,7 +18,6 @@ export default function ProfilePage() {
 
   const [showEditForm, setShowEditForm] = useState(false)
   const [editDisplayName, setEditDisplayName] = useState('')
-  const [editUsername, setEditUsername] = useState('')
   const [editFile, setEditFile] = useState(null)
   const [editPreview, setEditPreview] = useState(null)
   const [editFileError, setEditFileError] = useState(null)
@@ -32,7 +31,7 @@ export default function ProfilePage() {
       setProfileLoading(true)
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, username, avatar_url')
+        .select('id, display_name, avatar_url')
         .eq('id', userId)
         .single()
       if (error || !data) {
@@ -67,7 +66,6 @@ export default function ProfilePage() {
 
   function startEdit() {
     setEditDisplayName(profile.display_name || '')
-    setEditUsername(profile.username || '')
     setEditFile(null)
     setEditPreview(profile.avatar_url || null)
     setEditFileError(null)
@@ -134,7 +132,6 @@ export default function ProfilePage() {
         .from('profiles')
         .update({
           display_name: editDisplayName,
-          username: editUsername,
           avatar_url: newAvatarUrl,
         })
         .eq('id', userId)
@@ -143,7 +140,6 @@ export default function ProfilePage() {
       setProfile((p) => ({
         ...p,
         display_name: editDisplayName,
-        username: editUsername,
         avatar_url: newAvatarUrl,
       }))
       await refreshProfile()
@@ -191,7 +187,6 @@ export default function ProfilePage() {
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="text-3xl font-bold text-white break-words">{profile.display_name}</h1>
-          <p className="text-gray-500 text-sm mt-1">@{profile.username}</p>
           {isOwnProfile && !showEditForm && (
             <button
               onClick={startEdit}
@@ -219,19 +214,6 @@ export default function ProfilePage() {
                 required
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Username</label>
-              <input
-                type="text"
-                required
-                value={editUsername}
-                onChange={(e) => setEditUsername(e.target.value)}
                 className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
                 style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
                 onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}

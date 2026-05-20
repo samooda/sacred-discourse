@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function SignupPage() {
-  const [username, setUsername] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +20,6 @@ export default function SignupPage() {
       password,
       options: {
         data: {
-          username,
           display_name: displayName,
         },
       },
@@ -108,25 +106,6 @@ export default function SignupPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5" htmlFor="username">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="username"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
-                placeholder="ScholasticMind"
-              />
-            </div>
-
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5" htmlFor="display_name">
                 Display name
