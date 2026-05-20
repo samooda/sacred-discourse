@@ -6,6 +6,7 @@ import PostDetailPage from './pages/PostDetailPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import ProfilePage from './pages/ProfilePage'
+import SearchPage from './pages/SearchPage'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
     </div>
   )

@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const { user, signOut, profile } = useAuth()
+
+  const [topicsOpen, setTopicsOpen] = useState(false)
+  const topicsRef = useRef(null)
+
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+  const [searchQuery, setSearchQuery] = useState('')
+
   useEffect(() => {
     function handleMouseDown(e) {
+      if (topicsRef.current && !topicsRef.current.contains(e.target)) {
+        setTopicsOpen(false)
+      }
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false)
       }
@@ -18,6 +27,14 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleMouseDown)
     return () => document.removeEventListener('mousedown', handleMouseDown)
   }, [])
+
+  function handleSearchKeyDown(e) {
+    if (e.key !== 'Enter') return
+    const q = searchQuery.trim()
+    if (q.length < 3) return
+    navigate(`/search?q=${encodeURIComponent(q)}`)
+    setSearchQuery('')
+  }
 
   return (
     <nav
@@ -27,7 +44,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold"
               style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
@@ -39,23 +56,62 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Center nav — topic links */}
-          <div className="hidden md:flex items-center gap-1">
-            {topics.map((topic) => (
-              <NavLink
-                key={topic.slug}
-                to={`/topic/${topic.slug}`}
-                className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'text-white bg-gray-800'
-                      : 'text-gray-400 hover:text-gray-100 hover:bg-gray-800/60'
-                  }`
-                }
+          {/* Center — Topics dropdown + Search */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* Topics dropdown */}
+            <div className="relative" ref={topicsRef}>
+              <button
+                onClick={() => setTopicsOpen((o) => !o)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors text-gray-400 hover:text-gray-100 hover:bg-gray-800/60"
               >
-                {topic.name.split(' ')[0]}
-              </NavLink>
-            ))}
+                Topics
+                <svg
+                  className={`w-3.5 h-3.5 transition-transform duration-150 ${topicsOpen ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {topicsOpen && (
+                <div
+                  className="absolute left-0 mt-2 w-52 rounded-md border py-1 shadow-lg"
+                  style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}
+                >
+                  {topics.map((topic) => (
+                    <button
+                      key={topic.slug}
+                      onClick={() => { setTopicsOpen(false); navigate(`/topic/${topic.slug}`) }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2.5"
+                    >
+                      <span>{topic.symbol}</span>
+                      <span>{topic.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Search bar */}
+            <div className="relative">
+              <svg
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search posts…"
+                className="w-56 pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors"
+                style={{ backgroundColor: '#111827', border: '1px solid #2d3748' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+              />
+            </div>
           </div>
 
           {/* Right — auth */}
