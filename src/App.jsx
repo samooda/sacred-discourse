@@ -5,6 +5,7 @@ import TopicPage from './pages/TopicPage'
 import PostDetailPage from './pages/PostDetailPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/topic/:topicSlug/post/:postId" element={<PostDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
       </Routes>
     </div>
   )

@@ -1,10 +1,23 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const { user, signOut } = useAuth()
+  const { user, signOut, profile } = useAuth()
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef(null)
+
+  useEffect(() => {
+    function handleMouseDown(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [])
 
   return (
     <nav
@@ -48,12 +61,45 @@ export default function Navbar() {
           {/* Right — auth */}
           <div className="flex items-center gap-2">
             {user ? (
-              <button
-                onClick={async () => { await signOut(); navigate('/') }}
-                className="px-3 py-1.5 text-sm font-medium text-gray-400 hover:text-gray-100 transition-colors rounded-md hover:bg-gray-800/60"
-              >
-                Sign out
-              </button>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen((o) => !o)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden focus:outline-none ring-2 ring-transparent hover:ring-gray-600 transition-all"
+                  style={{ backgroundColor: '#1f2937' }}
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold text-gray-100">
+                      {profile?.display_name?.[0]?.toUpperCase() ?? '?'}
+                    </span>
+                  )}
+                </button>
+
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-44 rounded-md border py-1 shadow-lg"
+                    style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}
+                  >
+                    <button
+                      onClick={() => { setDropdownOpen(false); navigate(`/profile/${user.id}`) }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+                    >
+                      Profile
+                    </button>
+                    <button
+                      onClick={async () => { setDropdownOpen(false); await signOut(); navigate('/') }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link

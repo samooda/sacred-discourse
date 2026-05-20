@@ -552,7 +552,12 @@ export default function PostDetailPage() {
               >
                 {(post.profiles?.display_name ?? '?')[0].toUpperCase()}
               </div>
-              <span className="text-gray-400">{post.profiles?.display_name ?? 'Unknown'}</span>
+              <Link
+                to={`/profile/${post.author_id}`}
+                className="text-gray-400 hover:text-gray-200 transition-colors"
+              >
+                {post.profiles?.display_name ?? 'Unknown'}
+              </Link>
             </div>
             <span>·</span>
             <span>
@@ -1119,9 +1124,12 @@ export default function PostDetailPage() {
                   >
                     {(reply.profiles?.display_name ?? '?')[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium text-gray-300">
+                  <Link
+                    to={`/profile/${reply.author_id}`}
+                    className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+                  >
                     {reply.profiles?.display_name ?? 'Unknown'}
-                  </span>
+                  </Link>
                   <span className="text-xs text-gray-600">
                     {new Date(reply.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
