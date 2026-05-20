@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       .select('id, display_name, avatar_url')
       .eq('id', userId)
       .single()
-setProfile(data ?? null)
+    setProfile(data ?? null)
   }
 
   async function refreshProfile() {
@@ -25,16 +25,16 @@ setProfile(data ?? null)
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-setSession(session)
+      setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
         await fetchProfile(session.user.id)
-}
+      }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-setSession(session)
+      setSession(session)
       setUser(session?.user ?? null)
       if (event === 'SIGNED_IN' && session?.user) {
         fetchProfile(session.user.id)

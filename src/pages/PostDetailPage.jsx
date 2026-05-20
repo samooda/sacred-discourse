@@ -3,23 +3,9 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-
-function formatFileSize(bytes) {
-  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-  return (bytes / 1024).toFixed(1) + ' KB'
-}
-
-function getFileIcon(mimeType) {
-  if (mimeType === 'application/pdf')
-    return { color: '#ef4444', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
-  if (mimeType.startsWith('image/'))
-    return { color: '#22c55e', path: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' }
-  if (mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
-    return { color: '#f97316', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
-  if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    return { color: '#3b82f6', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
-  return { color: '#9ca3af', path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }
-}
+import { formatFileSize, formatDate } from '../utils/format'
+import { validateFiles } from '../utils/fileValidation'
+import { getFileIcon } from '../utils/fileIcons'
 
 export default function PostDetailPage() {
   const { topicSlug, postId } = useParams()
@@ -268,27 +254,7 @@ export default function PostDetailPage() {
 
   function handleEditFileChange(e) {
     setEditFileError(null)
-    const files = Array.from(e.target.files)
-    const allowedTypes = new Set([
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ])
-    const maxSize = 50 * 1024 * 1024
-    const errors = []
-    const valid = []
-    for (const file of files) {
-      if (file.size > maxSize) {
-        errors.push(`"${file.name}": exceeds the 50 MB size limit`)
-      } else if (!allowedTypes.has(file.type)) {
-        errors.push(`"${file.name}": file type not allowed`)
-      } else {
-        valid.push(file)
-      }
-    }
+    const { valid, errors } = validateFiles(Array.from(e.target.files))
     if (errors.length > 0) setEditFileError(errors.join('\n'))
     if (valid.length > 0) setEditNewFiles((prev) => [...prev, ...valid])
     e.target.value = ''
@@ -534,13 +500,7 @@ export default function PostDetailPage() {
               </Link>
             </div>
             <span>·</span>
-            <span>
-              {new Date(post.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </span>
+            <span>{formatDate(post.created_at)}</span>
             {post.is_edited && (
               <span className="text-xs text-gray-600">Edited</span>
             )}
@@ -1087,13 +1047,7 @@ export default function PostDetailPage() {
                   >
                     {reply.profiles?.display_name ?? 'Unknown'}
                   </Link>
-                  <span className="text-xs text-gray-600">
-                    {new Date(reply.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
+                  <span className="text-xs text-gray-600">{formatDate(reply.created_at)}</span>
                   <button
                     onClick={() => toggleReplyLike(reply.id)}
                     className="ml-auto flex items-center gap-1.5 transition-colors"

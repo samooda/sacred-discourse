@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
+import { formatDate } from '../utils/format'
 
 export default function PostCard({ post, topicSlug }) {
   const navigate = useNavigate()
@@ -53,11 +54,7 @@ export default function PostCard({ post, topicSlug }) {
                 {post.profiles?.display_name ?? 'Unknown'}
               </Link>
               {' · '}
-              {new Date(post.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
+              {formatDate(post.created_at)}
             </span>
           </div>
         </div>

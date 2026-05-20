@@ -4,11 +4,8 @@ import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import PostCard from '../components/PostCard'
-
-function formatFileSize(bytes) {
-  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
-  return (bytes / 1024).toFixed(1) + ' KB'
-}
+import { formatFileSize } from '../utils/format'
+import { validateFiles } from '../utils/fileValidation'
 
 export default function TopicPage() {
   const { topicSlug } = useParams()
@@ -42,7 +39,7 @@ export default function TopicPage() {
       const { data, error } = await supabase
         .from('posts')
         .select(`
-          id, title, description, views, created_at, author_id,
+          id, title, views, created_at, author_id,
           profiles ( display_name ),
           replies ( id )
         `)
@@ -85,10 +82,7 @@ export default function TopicPage() {
         setFormError(error.message)
         setSubmitting(false)
       } else {
-        setTitle('')
-        setDescription('')
-        setShowForm(false)
-        setSubmitting(false)
+        resetForm()
         setPostsVersion((v) => v + 1)
       }
       return
@@ -136,37 +130,21 @@ export default function TopicPage() {
     }
 
     // Full success
+    setSelectedFiles([])
+    resetForm()
+    setPostsVersion((v) => v + 1)
+  }
+
+  function resetForm() {
     setTitle('')
     setDescription('')
-    setSelectedFiles([])
     setShowForm(false)
     setSubmitting(false)
-    setPostsVersion((v) => v + 1)
   }
 
   function handleFileChange(e) {
     setFileError(null)
-    const files = Array.from(e.target.files)
-    const allowedTypes = new Set([
-      'application/pdf',
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ])
-    const maxSize = 50 * 1024 * 1024
-    const errors = []
-    const valid = []
-    for (const file of files) {
-      if (file.size > maxSize) {
-        errors.push(`"${file.name}": exceeds the 50 MB size limit`)
-      } else if (!allowedTypes.has(file.type)) {
-        errors.push(`"${file.name}": file type not allowed`)
-      } else {
-        valid.push(file)
-      }
-    }
+    const { valid, errors } = validateFiles(Array.from(e.target.files))
     if (errors.length > 0) setFileError(errors.join('\n'))
     if (valid.length > 0) setSelectedFiles((prev) => [...prev, ...valid])
     e.target.value = ''
