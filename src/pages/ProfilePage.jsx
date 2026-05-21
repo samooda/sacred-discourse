@@ -17,6 +17,7 @@ export default function ProfilePage() {
 
   const [posts, setPosts] = useState([])
   const [postsLoading, setPostsLoading] = useState(true)
+  const [postsError, setPostsError] = useState(null)
 
   const [showEditForm, setShowEditForm] = useState(false)
   const [editDisplayName, setEditDisplayName] = useState('')
@@ -49,6 +50,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchPosts() {
       setPostsLoading(true)
+      setPostsError(null)
       const { data, error } = await supabase
         .from('posts')
         .select(`
@@ -58,7 +60,9 @@ export default function ProfilePage() {
         `)
         .eq('author_id', userId)
         .order('created_at', { ascending: false })
-      if (!error) {
+      if (error) {
+        setPostsError(error.message)
+      } else {
         setPosts(data || [])
       }
       setPostsLoading(false)
@@ -270,13 +274,17 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {!postsLoading && posts.length > 0 && (
+      {!postsLoading && postsError && (
+        <ErrorBanner>{postsError}</ErrorBanner>
+      )}
+
+      {!postsLoading && !postsError && posts.length > 0 && (
         <h2 className="text-lg font-semibold text-white mb-6 break-words">
           {profile.display_name}'s posts
         </h2>
       )}
 
-      {!postsLoading && (
+      {!postsLoading && !postsError && (
         <TopicGroupedPosts
           posts={posts}
           emptyState={

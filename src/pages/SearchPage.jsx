@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import TopicGroupedPosts from '../components/TopicGroupedPosts'
 
@@ -10,17 +11,20 @@ export default function SearchPage() {
 
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const q = query.trim()
     if (q.length < 3) {
       setResults([])
+      setError(null)
       return
     }
 
     async function runSearch() {
       setLoading(true)
       setResults([])
+      setError(null)
       const { data, error } = await supabase
         .from('posts')
         .select(`
@@ -29,7 +33,9 @@ export default function SearchPage() {
           replies ( id )
         `)
         .textSearch('search_vector', q, { type: 'websearch', config: 'english' })
-      if (!error) {
+      if (error) {
+        setError(error.message)
+      } else {
         setResults(data || [])
       }
       setLoading(false)
@@ -54,6 +60,8 @@ export default function SearchPage() {
       <h1 className="text-2xl font-bold text-white mb-8">
         {loading ? (
           <>Searching for <span style={{ color: '#818cf8' }}>'{query}'</span>…</>
+        ) : error ? (
+          <>Search failed</>
         ) : (
           <>
             {results.length} result{results.length !== 1 ? 's' : ''} for{' '}
@@ -69,7 +77,11 @@ export default function SearchPage() {
         </div>
       )}
 
-      {!loading && results.length === 0 && (
+      {!loading && error && (
+        <ErrorBanner>Search failed. Please try again.</ErrorBanner>
+      )}
+
+      {!loading && !error && results.length === 0 && (
         <div
           className="rounded-xl border py-16 text-center"
           style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
@@ -79,7 +91,7 @@ export default function SearchPage() {
         </div>
       )}
 
-      {!loading && results.length > 0 && (
+      {!loading && !error && results.length > 0 && (
         <TopicGroupedPosts posts={results} />
       )}
     </main>

@@ -10,11 +10,15 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null)
 
   async function fetchProfile(userId) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('id, display_name, avatar_url')
       .eq('id', userId)
       .single()
+    if (error) {
+      setProfile(null)
+      return
+    }
     setProfile(data ?? null)
   }
 
