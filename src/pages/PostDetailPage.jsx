@@ -687,16 +687,17 @@ export default function PostDetailPage() {
             </form>
           </div>
         ) : (
-          <div className="mb-6">
-            <p className="text-sm text-gray-600">
-              <Link
-                to="/login"
-                className="transition-colors text-indigo-400 hover:text-indigo-300"
-              >
-                Sign in
-              </Link>
-              {' '}to join the discussion.
-            </p>
+          <div
+            className="mb-6 rounded-lg border px-4 py-4"
+            style={{ borderColor: '#1f2937', backgroundColor: '#0d0d17' }}
+          >
+            <p className="text-sm text-gray-400 mb-3">Join the discussion</p>
+            <Link
+              to="/login"
+              className="inline-flex items-center px-4 py-2 rounded-md text-xs font-medium transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
+            >
+              Sign in to reply
+            </Link>
           </div>
         )}
 

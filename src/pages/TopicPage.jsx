@@ -398,11 +398,16 @@ export default function TopicPage() {
             {topic.symbol}
           </div>
           <p className="text-gray-400 text-sm font-medium mb-1">No discussions yet</p>
-          <p className="text-gray-600 text-xs">
-            {user
-              ? 'Be the first to start a discussion.'
-              : 'Sign in to start the first discussion.'}
-          </p>
+          {user ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="text-xs font-medium transition-colors text-indigo-400 hover:text-indigo-300"
+            >
+              Start the first discussion →
+            </button>
+          ) : (
+            <p className="text-gray-600 text-xs">Sign in to start the first discussion.</p>
+          )}
         </div>
       )}
 

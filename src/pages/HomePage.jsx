@@ -202,17 +202,31 @@ export default function HomePage() {
         className="border-t mt-8"
         style={{ borderColor: '#1f2937', backgroundColor: '#0d0d17' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold"
-              style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-            >
-              SD
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2">
+              <div
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
+              >
+                SD
+              </div>
+              <span className="text-sm text-gray-500">Sacred Discourse</span>
             </div>
-            <span className="text-sm text-gray-500">Sacred Discourse</span>
+            <div className="flex items-center gap-5">
+              {topics.map((topic) => (
+                <Link
+                  key={topic.slug}
+                  to={`/topic/${topic.slug}`}
+                  className="flex items-center gap-1.5 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+                >
+                  <span>{topic.symbol}</span>
+                  <span>{topic.name.split(' ')[0]}</span>
+                </Link>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-gray-700">
+          <p className="text-xs text-gray-700 mt-5">
             Respectful scholarly discussion of world religions and secular philosophy.
           </p>
         </div>
