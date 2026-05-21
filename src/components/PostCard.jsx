@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { formatDate } from '../utils/format'
 
-export default function PostCard({ post, topicSlug }) {
+export default function PostCard({ post, topicSlug, index = 0 }) {
   const navigate = useNavigate()
   const topic = topics.find((t) => t.slug === topicSlug)
   const accentColor = topic?.accentColor ?? '#9ca3af'
@@ -24,6 +24,9 @@ export default function PostCard({ post, topicSlug }) {
         borderColor: '#1f2937',
         borderLeftColor: `${accentColor}80`,
         borderLeftWidth: '3px',
+        animation: 'cardFadeIn 200ms ease-out forwards',
+        animationDelay: `${Math.min(index, 7) * 40}ms`,
+        opacity: 0,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = `${accentColor}44`
