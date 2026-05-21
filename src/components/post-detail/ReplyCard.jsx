@@ -17,10 +17,18 @@ export default function ReplyCard({ reply, isLast }) {
     >
       <div className="flex items-center gap-3 mb-3">
         <div
-          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden"
           style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
         >
-          {(reply.profiles?.display_name ?? '?')[0].toUpperCase()}
+          {reply.profiles?.avatar_url ? (
+            <img
+              src={reply.profiles.avatar_url}
+              alt={reply.profiles.display_name ?? 'avatar'}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span>{(reply.profiles?.display_name ?? '?')[0].toUpperCase()}</span>
+          )}
         </div>
         <Link
           to={`/profile/${reply.author_id}`}

@@ -74,7 +74,7 @@ export default function PostDetailPage() {
 
       const { data, error } = await supabase
         .from('posts')
-        .select('*, profiles ( display_name )')
+        .select('*, profiles ( display_name, avatar_url )')
         .eq('id', postId)
         .single()
 
@@ -115,7 +115,7 @@ export default function PostDetailPage() {
 
       const { data, error } = await supabase
         .from('replies')
-        .select('*, profiles ( display_name )')
+        .select('*, profiles ( display_name, avatar_url )')
         .eq('post_id', postId)
         .order('created_at', { ascending: true })
 
@@ -501,10 +501,18 @@ export default function PostDetailPage() {
           {/* Meta — row 1: author + date */}
           <div className="flex items-center gap-2 mb-2">
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden"
               style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
             >
-              {(post.profiles?.display_name ?? '?')[0].toUpperCase()}
+              {post.profiles?.avatar_url ? (
+                <img
+                  src={post.profiles.avatar_url}
+                  alt={post.profiles.display_name ?? 'avatar'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{(post.profiles?.display_name ?? '?')[0].toUpperCase()}</span>
+              )}
             </div>
             <Link
               to={`/profile/${post.author_id}`}
