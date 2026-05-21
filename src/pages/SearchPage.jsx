@@ -47,9 +47,18 @@ export default function SearchPage() {
   if (query.trim().length < 3) {
     return (
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="py-20 text-center">
-          <p className="text-gray-400 text-sm font-medium mb-1">Enter a search term</p>
-          <p className="text-gray-600 text-xs">Type at least 3 characters in the search bar and press Enter.</p>
+        <div
+          className="rounded-xl border py-16 text-center"
+          style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
+        >
+          <svg
+            className="w-8 h-8 text-gray-600 mx-auto mb-3"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <p className="text-gray-400 text-sm font-medium mb-1">Search across all traditions</p>
+          <p className="text-gray-600 text-xs">Type at least 3 characters and press Enter.</p>
         </div>
       </main>
     )
@@ -59,13 +68,13 @@ export default function SearchPage() {
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl font-bold text-white mb-8">
         {loading ? (
-          <>Searching for <span style={{ color: '#818cf8' }}>'{query}'</span>…</>
+          <>Searching for <span style={{ color: '#a5b4fc' }}>'{query}'</span>…</>
         ) : error ? (
           <>Search failed</>
         ) : (
           <>
             {results.length} result{results.length !== 1 ? 's' : ''} for{' '}
-            <span style={{ color: '#818cf8' }}>'{query}'</span>
+            <span style={{ color: '#a5b4fc' }}>'{query}'</span>
           </>
         )}
       </h1>

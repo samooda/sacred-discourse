@@ -161,7 +161,7 @@ export default function ProfilePage() {
 
   if (profileLoading || !profile) {
     return (
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="py-16 text-center">
           <LoadingSpinner />
           <p className="text-gray-600 text-sm mt-3">Loading profile…</p>
@@ -171,9 +171,9 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
-      <div className="flex items-start gap-6 mb-10">
+      <div className="flex flex-col items-center text-center mb-10 gap-3">
         <div
           className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold overflow-hidden flex-shrink-0"
           style={{ backgroundColor: '#1f2937', color: '#f3f4f6' }}
@@ -184,7 +184,7 @@ export default function ProfilePage() {
             <span>{profile.display_name?.[0]?.toUpperCase() ?? '?'}</span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div>
           <h1 className="text-3xl font-bold text-white break-words">{profile.display_name}</h1>
           {isOwnProfile && !showEditForm && (
             <button
@@ -281,6 +281,7 @@ export default function ProfilePage() {
       {!postsLoading && !postsError && posts.length > 0 && (
         <h2 className="text-lg font-semibold text-white mb-6 break-words">
           {profile.display_name}'s posts
+          <span className="ml-2 text-sm font-normal text-gray-500">({posts.length})</span>
         </h2>
       )}
 

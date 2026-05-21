@@ -82,7 +82,7 @@ export default function SignupPage() {
     >
       <div className="text-center mb-8">
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold mx-auto mb-4"
+          className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold mx-auto mb-4"
           style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
         >
           SD
