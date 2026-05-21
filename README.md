@@ -180,20 +180,20 @@ If step 2 fails after step 1 succeeds, the orphaned Storage files are deleted be
 ## Screenshots
 
 ### Topic Page — Islam
-![Topic Page](./screenshots/Topic_Page.jpg)
-*Post list with reply and view counts, topic-coloured left accent borders, and the inline new post form.*
+![Topic Page](./screenshots/Topic%20Page.jpg)
+*Islam topic page with the discussion list, reply/view counts, and topic-coloured post cards.*
 
-### Post Detail — Attachments
-![Post with Attachments](./screenshots/PostPage_1.jpg)
-*Post header with author avatar, engagement stats, and the attachment viewer with inline PDF preview.*
+### Post Detail — Discussion & Attachments
+![Post Detail](./screenshots/PostPage_1.jpg)
+*Post header with author avatar, engagement stats, and the attachment list.*
 
-### Post Detail — Replies
-![Post Replies](./screenshots/PostPage_2.jpg)
-*Reply thread with profile pictures, like buttons, collapsible long replies, and the reply form.*
+### Post Detail — Document Preview & Replies
+![Post Detail Replies](./screenshots/PostPage_2.jpg)
+*Inline document preview expanded alongside the reply thread.*
 
 ### User Profile
-![Profile Page](./screenshots/Profile_Page.jpg)
-*Profile page with avatar, post history grouped by tradition, and the inline edit form.*
+![Profile Page](./screenshots/Profile%20Page.jpg)
+*Profile page with avatar, edit form, and post history grouped by tradition.*
 
 ### Search Results
 ![Search Results](./screenshots/Search.jpg)
