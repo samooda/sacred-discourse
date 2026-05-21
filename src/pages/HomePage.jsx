@@ -66,7 +66,7 @@ export default function HomePage() {
             through honest, rigorous discourse across the world's great religious traditions.
           </p>
           <Link
-              to="/topic/christianity"
+              to="/topic/islam"
               className="px-6 py-3 rounded-lg font-medium text-sm transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
             >
               Browse discussions

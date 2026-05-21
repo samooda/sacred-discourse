@@ -487,7 +487,7 @@ export default function PostDetailPage() {
         style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
       >
         <div
-          className="h-1 w-full"
+          className="h-1.5 w-full"
           style={{
             background: `linear-gradient(to right, ${topic.gradientFrom}, ${topic.gradientTo})`,
           }}

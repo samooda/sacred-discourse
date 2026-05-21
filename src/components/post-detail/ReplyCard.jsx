@@ -70,7 +70,7 @@ export default function ReplyCard({ reply, isLast }) {
           </span>
         )}
       </div>
-      <p className="text-gray-400 text-sm leading-relaxed pl-10 break-all">
+      <p className="text-gray-400 text-sm leading-relaxed pl-10 break-words">
         {reply.content.length > 300 ? (
           <>
             {expandedReplies.has(reply.id)

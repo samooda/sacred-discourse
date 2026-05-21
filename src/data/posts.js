@@ -1,15 +1,5 @@
 export const topics = [
   {
-    slug: 'christianity',
-    name: 'Christianity',
-    description:
-      'Explore the teachings, history, and traditions of Christianity — from the early church fathers to modern denominations and theology.',
-    symbol: '✝',
-    gradientFrom: '#1e3a5f',
-    gradientTo: '#1e40af',
-    accentColor: '#3b82f6',
-  },
-  {
     slug: 'islam',
     name: 'Islam',
     description:
@@ -18,6 +8,16 @@ export const topics = [
     gradientFrom: '#14532d',
     gradientTo: '#15803d',
     accentColor: '#22c55e',
+  },
+  {
+    slug: 'christianity',
+    name: 'Christianity',
+    description:
+      'Explore the teachings, history, and traditions of Christianity — from the early church fathers to modern denominations and theology.',
+    symbol: '✝',
+    gradientFrom: '#1e3a5f',
+    gradientTo: '#1e40af',
+    accentColor: '#3b82f6',
   },
   {
     slug: 'judaism',

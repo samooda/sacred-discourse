@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, signOut, profile } = useAuth()
+
+  const topicMatch = location.pathname.match(/^\/topic\/([^/]+)/)
+  const currentTopicSlug = topicMatch ? topicMatch[1] : null
 
   const [topicsOpen, setTopicsOpen] = useState(false)
   const topicsRef = useRef(null)
@@ -57,7 +61,7 @@ export default function Navbar() {
           </Link>
 
           {/* Center — Topics dropdown + Search */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-5">
             {/* Topics dropdown */}
             <div className="relative" ref={topicsRef}>
               <button
@@ -75,19 +79,36 @@ export default function Navbar() {
 
               {topicsOpen && (
                 <div
-                  className="absolute left-0 mt-2 w-52 rounded-md border py-1 shadow-lg"
+                  className="absolute left-0 mt-1.5 w-52 rounded-md border py-1 shadow-xl z-[60]"
                   style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}
                 >
-                  {topics.map((topic) => (
-                    <button
-                      key={topic.slug}
-                      onClick={() => { setTopicsOpen(false); navigate(`/topic/${topic.slug}`) }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-800 transition-colors flex items-center gap-2.5"
-                    >
-                      <span>{topic.symbol}</span>
-                      <span>{topic.name}</span>
-                    </button>
-                  ))}
+                  {topics.map((topic) => {
+                    const isActive = topic.slug === currentTopicSlug
+                    return (
+                      <button
+                        key={topic.slug}
+                        onClick={() => { setTopicsOpen(false); navigate(`/topic/${topic.slug}`) }}
+                        className="w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2.5"
+                        style={{
+                          color: isActive ? topic.accentColor : '#d1d5db',
+                          backgroundColor: isActive ? `${topic.accentColor}18` : 'transparent',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActive) {
+                            e.currentTarget.style.color = '#ffffff'
+                            e.currentTarget.style.backgroundColor = '#1f2937'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = isActive ? topic.accentColor : '#d1d5db'
+                          e.currentTarget.style.backgroundColor = isActive ? `${topic.accentColor}18` : 'transparent'
+                        }}
+                      >
+                        <span>{topic.symbol}</span>
+                        <span>{topic.name}</span>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -106,7 +127,7 @@ export default function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 placeholder="Search posts…"
-                className="w-56 pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors bg-[#111827] border border-[#2d3748] focus:border-indigo-600"
+                className="w-64 pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors bg-[#111827] border border-[#2d3748] focus:border-indigo-600"
               />
             </div>
           </div>
