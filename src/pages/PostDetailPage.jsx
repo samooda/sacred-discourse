@@ -498,32 +498,33 @@ export default function PostDetailPage() {
             {post.title}
           </h1>
 
-          {/* Meta */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
-              >
-                {(post.profiles?.display_name ?? '?')[0].toUpperCase()}
-              </div>
-              <Link
-                to={`/profile/${post.author_id}`}
-                className="text-gray-400 hover:text-gray-200 transition-colors"
-              >
-                {post.profiles?.display_name ?? 'Unknown'}
-              </Link>
+          {/* Meta — row 1: author + date */}
+          <div className="flex items-center gap-2 mb-2">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
+            >
+              {(post.profiles?.display_name ?? '?')[0].toUpperCase()}
             </div>
-            <span>·</span>
-            <span>{formatDate(post.created_at)}</span>
+            <Link
+              to={`/profile/${post.author_id}`}
+              className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
+            >
+              {post.profiles?.display_name ?? 'Unknown'}
+            </Link>
+            <span className="text-gray-600">·</span>
+            <span className="text-sm text-gray-500">{formatDate(post.created_at)}</span>
             {post.is_edited && (
-              <span className="text-xs text-gray-600">Edited</span>
+              <span className="text-xs text-gray-600 italic">Edited</span>
             )}
-            <span>·</span>
+          </div>
+
+          {/* Meta — row 2: engagement stats */}
+          <div className="flex items-center gap-3 text-sm text-gray-500">
             <span>{post.views ?? 0} views</span>
-            <span>·</span>
+            <span className="text-gray-700">·</span>
             <span>{replies.length} replies</span>
-            <span>·</span>
+            <span className="text-gray-700">·</span>
             <button
               onClick={togglePostLike}
               className="flex items-center gap-1.5 transition-colors"
@@ -556,16 +557,20 @@ export default function PostDetailPage() {
           {user?.id === post.author_id && (
             <div className="mt-5 pt-5 border-t" style={{ borderColor: '#1f2937' }}>
               {!confirmDelete ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={openEditForm}
-                    className="text-xs font-medium transition-colors text-gray-400 hover:text-gray-200"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors text-gray-400 hover:text-gray-100 hover:border-gray-500"
+                    style={{ borderColor: '#374151', backgroundColor: 'transparent' }}
                   >
                     Edit post
                   </button>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="text-xs font-medium transition-colors text-red-400 hover:text-red-500"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
+                    style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#f87171', backgroundColor: 'rgba(239,68,68,0.08)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)' }}
                   >
                     Delete post
                   </button>
@@ -615,6 +620,7 @@ export default function PostDetailPage() {
           <EditPostForm />
         ) : (
           <>
+            <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-4">Discussion</p>
             <p className="text-gray-300 leading-relaxed text-base mb-6 break-words">
               {post.description}
             </p>
@@ -641,7 +647,7 @@ export default function PostDetailPage() {
         {/* Reply form — logged-in users only */}
         {user ? (
           <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-400 mb-3">Add a reply</h3>
+            <h3 className="text-sm font-semibold text-gray-200 mb-3">Add a reply</h3>
             {postGone ? (
               <ErrorBanner className="mb-3">
                 <p className="mb-2">This post no longer exists. It may have been deleted.</p>
