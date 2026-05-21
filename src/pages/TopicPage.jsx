@@ -244,8 +244,12 @@ export default function TopicPage() {
         {user && (
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="px-3 py-1.5 text-xs font-medium rounded-md border transition-colors text-gray-400 hover:text-white"
-            style={{ borderColor: '#374151', backgroundColor: 'transparent' }}
+            className={`px-4 py-2 text-xs font-medium rounded-md transition-colors ${
+              showForm
+                ? 'border text-gray-400 hover:text-white'
+                : 'bg-indigo-600 hover:bg-indigo-700 text-indigo-100'
+            }`}
+            style={showForm ? { borderColor: '#374151', backgroundColor: 'transparent' } : {}}
           >
             {showForm ? 'Cancel' : '+ New post'}
           </button>

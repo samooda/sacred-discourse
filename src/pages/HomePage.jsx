@@ -98,10 +98,7 @@ export default function HomePage() {
       {/* Topic cards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-10">
-          <h2 className="font-display text-3xl font-semibold text-white mb-2">Explore traditions</h2>
-          <p className="text-gray-500 text-sm">
-            Select a section to view discussions, read posts, and join the conversation.
-          </p>
+          <h2 className="font-display text-3xl font-semibold text-white">Explore traditions</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {topics.map((topic) => {
@@ -170,7 +167,12 @@ export default function HomePage() {
                   {/* Latest post preview */}
                   <div
                     className="rounded-lg p-3 border"
-                    style={{ backgroundColor: '#0a0a0f', borderColor: '#1f2937' }}
+                    style={{
+                      backgroundColor: '#0a0a0f',
+                      borderColor: '#1f2937',
+                      borderLeftColor: `${topic.accentColor}55`,
+                      borderLeftWidth: '3px',
+                    }}
                   >
                     <p className="text-xs text-gray-500 mb-1">Latest post</p>
                     {latestPost ? (
