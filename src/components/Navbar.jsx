@@ -106,10 +106,7 @@ export default function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 placeholder="Search posts…"
-                className="w-56 pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#111827', border: '1px solid #2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="w-56 pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors bg-[#111827] border border-[#2d3748] focus:border-indigo-600"
               />
             </div>
           </div>
@@ -166,10 +163,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors"
-                  style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+                  className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
                 >
                   Sign up
                 </Link>

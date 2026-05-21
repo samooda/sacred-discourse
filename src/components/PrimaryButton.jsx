@@ -11,10 +11,7 @@ export default function PrimaryButton({
       type={type}
       disabled={disabled || loading}
       onClick={onClick}
-      className={`rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
-      style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-      onMouseEnter={(e) => { if (!disabled && !loading) e.currentTarget.style.backgroundColor = '#4338ca' }}
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+      className={`bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 text-indigo-100 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>

@@ -544,19 +544,13 @@ export default function PostDetailPage() {
                 <div className="flex items-center gap-4">
                   <button
                     onClick={openEditForm}
-                    className="text-xs font-medium transition-colors"
-                    style={{ color: '#9ca3af' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#e5e7eb')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
+                    className="text-xs font-medium transition-colors text-gray-400 hover:text-gray-200"
                   >
                     Edit post
                   </button>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="text-xs font-medium transition-colors"
-                    style={{ color: '#f87171' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                    className="text-xs font-medium transition-colors text-red-400 hover:text-red-500"
                   >
                     Delete post
                   </button>
@@ -613,10 +607,7 @@ export default function PostDetailPage() {
                 type="text"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
                 maxLength={100}
               />
               <p
@@ -633,10 +624,8 @@ export default function PostDetailPage() {
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors resize-none"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', minHeight: '120px' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors resize-none"
+                style={{ minHeight: '120px' }}
                 maxLength={750}
               />
               <p
@@ -666,10 +655,7 @@ export default function PostDetailPage() {
                         onClick={() =>
                           setEditExistingAttachments((prev) => prev.filter((a) => a.id !== att.id))
                         }
-                        className="text-xs font-medium flex-shrink-0 transition-colors"
-                        style={{ color: '#f87171' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                        className="text-xs font-medium flex-shrink-0 transition-colors text-red-400 hover:text-red-500"
                       >
                         Remove
                       </button>
@@ -686,10 +672,7 @@ export default function PostDetailPage() {
               </label>
               {editFileError && <ErrorBanner preWrap className="mb-2">{editFileError}</ErrorBanner>}
               <label
-                className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="flex items-center gap-2 w-full rounded-lg border border-[#2d3748] hover:border-indigo-600 px-3 py-2.5 text-sm cursor-pointer transition-colors bg-[#0a0a0f] text-gray-500"
               >
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
@@ -783,16 +766,7 @@ export default function PostDetailPage() {
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-                            style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#4f46e5'
-                              e.currentTarget.style.color = '#ffffff'
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#374151'
-                              e.currentTarget.style.color = '#9ca3af'
-                            }}
+                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
                           >
                             Download
                           </a>
@@ -803,16 +777,7 @@ export default function PostDetailPage() {
                                 expandedAttachment === attachment.id ? null : attachment.id
                               )
                             }
-                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"
-                            style={{ borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = '#4f46e5'
-                              e.currentTarget.style.color = '#ffffff'
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = '#374151'
-                              e.currentTarget.style.color = '#9ca3af'
-                            }}
+                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
                           >
                             {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
                           </button>
@@ -895,10 +860,7 @@ export default function PostDetailPage() {
                 <p className="mb-2">This post no longer exists. It may have been deleted.</p>
                 <Link
                   to={`/topic/${topicSlug}`}
-                  className="underline underline-offset-2 transition-colors"
-                  style={{ color: '#fca5a5' }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = '#fca5a5')}
+                  className="underline underline-offset-2 transition-colors text-red-300 hover:text-white"
                 >
                   Back to {topic.name}
                 </Link>
@@ -911,14 +873,8 @@ export default function PostDetailPage() {
                 required
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
-                className="w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none transition-colors text-gray-300 placeholder-gray-600"
-                style={{
-                  backgroundColor: '#0a0a0f',
-                  borderColor: '#2d3748',
-                  minHeight: '100px',
-                }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-4 py-3 text-sm resize-none focus:outline-none transition-colors text-gray-300 placeholder-gray-600 bg-[#0a0a0f]"
+                style={{ minHeight: '100px' }}
                 placeholder="Share your thoughts or scholarly perspective…"
                 maxLength={2000}
               />
@@ -940,10 +896,7 @@ export default function PostDetailPage() {
             <p className="text-sm text-gray-600">
               <Link
                 to="/login"
-                className="transition-colors"
-                style={{ color: '#818cf8' }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
+                className="transition-colors text-indigo-400 hover:text-indigo-300"
               >
                 Sign in
               </Link>
@@ -1015,10 +968,7 @@ export default function PostDetailPage() {
                     <button
                       type="button"
                       onClick={() => deleteReply(reply.id)}
-                      className="text-xs font-medium transition-colors"
-                      style={{ color: '#f87171' }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = '#f87171')}
+                      className="text-xs font-medium transition-colors text-red-400 hover:text-red-500"
                     >
                       Delete
                     </button>
@@ -1046,10 +996,7 @@ export default function PostDetailPage() {
                             return next
                           })
                         }
-                        className="text-xs font-medium transition-colors"
-                        style={{ color: '#818cf8' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
+                        className="text-xs font-medium transition-colors text-indigo-400 hover:text-indigo-300"
                       >
                         {expandedReplies.has(reply.id) ? 'Show less' : 'Show more'}
                       </button>

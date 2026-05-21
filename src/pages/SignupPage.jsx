@@ -57,10 +57,7 @@ export default function SignupPage() {
           </p>
           <Link
             to="/login"
-            className="inline-block mt-6 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-            style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+            className="inline-block mt-6 px-5 py-2 rounded-lg text-sm font-medium transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
           >
             Go to sign in
           </Link>
@@ -76,10 +73,7 @@ export default function SignupPage() {
           Already have an account?{' '}
           <Link
             to="/login"
-            className="font-medium transition-colors"
-            style={{ color: '#818cf8' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#a5b4fc')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#818cf8')}
+            className="font-medium transition-colors text-indigo-400 hover:text-indigo-300"
           >
             Sign in
           </Link>
@@ -111,10 +105,7 @@ export default function SignupPage() {
             required
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-            style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+            className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
             placeholder="Your full name or alias"
           />
         </div>
@@ -130,10 +121,7 @@ export default function SignupPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-            style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+            className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
             placeholder="you@example.com"
           />
         </div>
@@ -149,10 +137,7 @@ export default function SignupPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-            style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-            onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+            className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
             placeholder="Min. 8 characters"
           />
         </div>

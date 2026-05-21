@@ -214,10 +214,7 @@ export default function ProfilePage() {
                 required
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
               />
             </div>
             <div>
@@ -237,10 +234,7 @@ export default function ProfilePage() {
               </div>
               {editFileError && <ErrorBanner className="mb-2">{editFileError}</ErrorBanner>}
               <label
-                className="flex items-center gap-2 w-full rounded-lg border px-3 py-2.5 text-sm cursor-pointer transition-colors"
-                style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', color: '#6b7280' }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#4f46e5')}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2d3748')}
+                className="flex items-center gap-2 w-full rounded-lg border border-[#2d3748] hover:border-indigo-600 px-3 py-2.5 text-sm cursor-pointer transition-colors bg-[#0a0a0f] text-gray-500"
               >
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

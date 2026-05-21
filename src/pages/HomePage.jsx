@@ -67,10 +67,7 @@ export default function HomePage() {
           </p>
           <Link
               to="/topic/christianity"
-              className="px-6 py-3 rounded-lg font-medium text-sm transition-colors"
-              style={{ backgroundColor: '#4f46e5', color: '#e0e7ff' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+              className="px-6 py-3 rounded-lg font-medium text-sm transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
             >
               Browse discussions
             </Link>
