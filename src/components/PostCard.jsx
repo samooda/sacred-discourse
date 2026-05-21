@@ -18,20 +18,29 @@ export default function PostCard({ post, topicSlug }) {
           navigate(`/topic/${topicSlug}/post/${post.id}`)
         }
       }}
-      className="group block rounded-xl border p-5 transition-all duration-150 cursor-pointer"
-      style={{ backgroundColor: '#111118', borderColor: '#1f2937' }}
+      className="group block rounded-xl border px-4 pt-4 pb-3 transition-all duration-150 cursor-pointer"
+      style={{
+        backgroundColor: '#111118',
+        borderColor: '#1f2937',
+        borderLeftColor: `${accentColor}80`,
+        borderLeftWidth: '3px',
+      }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = accentColor + '44'
+        e.currentTarget.style.borderColor = `${accentColor}44`
+        e.currentTarget.style.borderLeftColor = `${accentColor}cc`
         e.currentTarget.style.backgroundColor = '#131320'
+        e.currentTarget.querySelector('h3').style.color = accentColor
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = '#1f2937'
+        e.currentTarget.style.borderLeftColor = `${accentColor}80`
         e.currentTarget.style.backgroundColor = '#111118'
+        e.currentTarget.querySelector('h3').style.color = ''
       }}
     >
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-5">
         {/* Left metadata column */}
-        <div className="hidden sm:flex flex-col items-center gap-3 pt-0.5 min-w-[48px]">
+        <div className="hidden sm:flex flex-col items-center gap-1.5 min-w-[44px]">
           <div className="text-center">
             <div className="text-sm font-semibold text-gray-300">
               {(post.replies ?? []).length}
@@ -39,7 +48,7 @@ export default function PostCard({ post, topicSlug }) {
             <div className="text-xs text-gray-600">replies</div>
           </div>
           <div className="text-center">
-            <div className="text-sm font-semibold text-gray-500">
+            <div className="text-sm font-semibold text-gray-400">
               {post.views ?? 0}
             </div>
             <div className="text-xs text-gray-600">views</div>
@@ -48,27 +57,25 @@ export default function PostCard({ post, topicSlug }) {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-white text-base leading-snug mb-2 group-hover:text-indigo-300 transition-colors break-words">
+          <h3 className="font-semibold text-white text-base leading-snug mb-2 break-words transition-colors">
             {post.title}
           </h3>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-gray-600 ml-auto">
-              by{' '}
-              <Link
-                to={`/profile/${post.author_id}`}
-                onClick={(e) => e.stopPropagation()}
-                className="text-gray-500 hover:text-gray-300 transition-colors"
-              >
-                {post.profiles?.display_name ?? 'Unknown'}
-              </Link>
-              {' · '}
-              {formatDate(post.created_at)}
-            </span>
-          </div>
+          <p className="text-sm text-gray-500">
+            by{' '}
+            <Link
+              to={`/profile/${post.author_id}`}
+              onClick={(e) => e.stopPropagation()}
+              className="text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              {post.profiles?.display_name ?? 'Unknown'}
+            </Link>
+            {' · '}
+            {formatDate(post.created_at)}
+          </p>
         </div>
 
         <svg
-          className="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors mt-1 flex-shrink-0"
+          className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors mt-1 flex-shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
