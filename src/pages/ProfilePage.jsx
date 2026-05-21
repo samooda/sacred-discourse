@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
-import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import PostCard from '../components/PostCard'
 import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PrimaryButton from '../components/PrimaryButton'
+import TopicGroupedPosts from '../components/TopicGroupedPosts'
 
 export default function ProfilePage() {
   const { userId } = useParams()
@@ -167,10 +166,6 @@ export default function ProfilePage() {
     )
   }
 
-  const postsByTopic = topics
-    .map((t) => ({ topic: t, posts: posts.filter((p) => p.topic_slug === t.slug) }))
-    .filter((g) => g.posts.length > 0)
-
   return (
     <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
@@ -275,41 +270,27 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {!postsLoading && posts.length === 0 && (
-        <div
-          className="rounded-xl border py-16 text-center"
-          style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
-        >
-          <p className="text-gray-400 text-sm font-medium mb-1">No posts yet</p>
-          <p className="text-gray-600 text-xs">
-            {isOwnProfile ? 'Your discussions will appear here.' : 'This user has not posted yet.'}
-          </p>
-        </div>
+      {!postsLoading && posts.length > 0 && (
+        <h2 className="text-lg font-semibold text-white mb-6 break-words">
+          {profile.display_name}'s posts
+        </h2>
       )}
 
-      {!postsLoading && posts.length > 0 && (
-        <>
-          <h2 className="text-lg font-semibold text-white mb-6 break-words">
-            {profile.display_name}'s posts
-          </h2>
-          <div className="space-y-10">
-            {postsByTopic.map(({ topic, posts: topicPosts }) => (
-              <section key={topic.slug}>
-                <h3
-                  className="text-sm font-semibold uppercase tracking-wider mb-3"
-                  style={{ color: topic.accentColor }}
-                >
-                  {topic.name}
-                </h3>
-                <div className="space-y-3">
-                  {topicPosts.map((post) => (
-                    <PostCard key={post.id} post={post} topicSlug={post.topic_slug} />
-                  ))}
-                </div>
-              </section>
-            ))}
-          </div>
-        </>
+      {!postsLoading && (
+        <TopicGroupedPosts
+          posts={posts}
+          emptyState={
+            <div
+              className="rounded-xl border py-16 text-center"
+              style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
+            >
+              <p className="text-gray-400 text-sm font-medium mb-1">No posts yet</p>
+              <p className="text-gray-600 text-xs">
+                {isOwnProfile ? 'Your discussions will appear here.' : 'This user has not posted yet.'}
+              </p>
+            </div>
+          }
+        />
       )}
     </main>
   )

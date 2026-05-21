@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
-import PostCard from '../components/PostCard'
 import LoadingSpinner from '../components/LoadingSpinner'
+import TopicGroupedPosts from '../components/TopicGroupedPosts'
 
 export default function SearchPage() {
   const [searchParams] = useSearchParams()
@@ -25,7 +24,7 @@ export default function SearchPage() {
       const { data, error } = await supabase
         .from('posts')
         .select(`
-          id, title, description, topic_slug, created_at, author_id,
+          id, title, topic_slug, created_at, author_id,
           profiles ( display_name ),
           replies ( id )
         `)
@@ -38,10 +37,6 @@ export default function SearchPage() {
 
     runSearch()
   }, [query])
-
-  const resultsByTopic = topics
-    .map((t) => ({ topic: t, posts: results.filter((p) => p.topic_slug === t.slug) }))
-    .filter((g) => g.posts.length > 0)
 
   if (query.trim().length < 3) {
     return (
@@ -85,23 +80,7 @@ export default function SearchPage() {
       )}
 
       {!loading && results.length > 0 && (
-        <div className="space-y-10">
-          {resultsByTopic.map(({ topic, posts }) => (
-            <section key={topic.slug}>
-              <h2
-                className="text-sm font-semibold uppercase tracking-wider mb-3"
-                style={{ color: topic.accentColor }}
-              >
-                {topic.name}
-              </h2>
-              <div className="space-y-3">
-                {posts.map((post) => (
-                  <PostCard key={post.id} post={post} topicSlug={post.topic_slug} />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        <TopicGroupedPosts posts={results} />
       )}
     </main>
   )

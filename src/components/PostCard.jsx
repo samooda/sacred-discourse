@@ -9,7 +9,15 @@ export default function PostCard({ post, topicSlug }) {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => navigate(`/topic/${topicSlug}/post/${post.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          navigate(`/topic/${topicSlug}/post/${post.id}`)
+        }
+      }}
       className="group block rounded-xl border p-5 transition-all duration-150 cursor-pointer"
       style={{ backgroundColor: '#111118', borderColor: '#1f2937' }}
       onMouseEnter={(e) => {
