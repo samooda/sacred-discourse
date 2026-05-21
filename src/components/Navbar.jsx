@@ -61,7 +61,7 @@ export default function Navbar() {
           </Link>
 
           {/* Center — Topics dropdown + Search */}
-          <div className="hidden md:flex items-center gap-5">
+          <div className="hidden md:flex items-center gap-8">
             {/* Topics dropdown */}
             <div className="relative" ref={topicsRef}>
               <button
