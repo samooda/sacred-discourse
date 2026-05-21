@@ -39,7 +39,7 @@ export default function AttachmentViewer() {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
+                  className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-[#2d3748] hover:border-gray-600 bg-transparent text-gray-500 hover:text-gray-300"
                 >
                   Download
                 </a>
@@ -50,7 +50,7 @@ export default function AttachmentViewer() {
                       expandedAttachment === attachment.id ? null : attachment.id
                     )
                   }
-                  className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
+                  className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-600 hover:border-indigo-500 bg-transparent text-gray-300 hover:text-white"
                 >
                   {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
                 </button>

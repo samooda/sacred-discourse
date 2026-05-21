@@ -93,9 +93,10 @@ export default function EditPostForm() {
       )}
 
       {/* New file picker */}
-      <div>
+      <div className={editExistingAttachments.length > 0 ? 'pt-4 border-t border-[#1f2937]' : ''}>
         <label className="block text-xs font-medium text-gray-400 mb-1.5">
-          Add attachments <span className="text-gray-600 font-normal">(optional)</span>
+          {editExistingAttachments.length > 0 ? 'Add more files' : 'Add attachments'}{' '}
+          <span className="text-gray-600 font-normal">(optional)</span>
         </label>
         {editFileError && <ErrorBanner preWrap className="mb-2">{editFileError}</ErrorBanner>}
         <label
