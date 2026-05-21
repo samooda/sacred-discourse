@@ -14,7 +14,11 @@ export default function TopicGroupedPosts({ posts, emptyState }) {
         <section key={topic.slug}>
           <h3
             className="text-sm font-semibold uppercase tracking-wider mb-3"
-            style={{ color: topic.accentColor }}
+            style={{
+              color: topic.accentColor,
+              borderLeft: `3px solid ${topic.accentColor}60`,
+              paddingLeft: '10px',
+            }}
           >
             {topic.name}
           </h3>

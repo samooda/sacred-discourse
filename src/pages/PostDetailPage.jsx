@@ -478,7 +478,7 @@ export default function PostDetailPage() {
         <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-        <span className="text-gray-400 truncate max-w-xs">{post.title}</span>
+        <span className="text-gray-400 truncate max-w-md">{post.title}</span>
       </nav>
 
       {/* Post header */}
@@ -558,13 +558,15 @@ export default function PostDetailPage() {
             <div className="mt-5 pt-5 border-t" style={{ borderColor: '#1f2937' }}>
               {!confirmDelete ? (
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={openEditForm}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors text-gray-400 hover:text-gray-100 hover:border-gray-500"
-                    style={{ borderColor: '#374151', backgroundColor: 'transparent' }}
-                  >
-                    Edit post
-                  </button>
+                  {!showEditForm && (
+                    <button
+                      onClick={openEditForm}
+                      className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors text-gray-400 hover:text-gray-100 hover:border-gray-500"
+                      style={{ borderColor: '#374151', backgroundColor: 'transparent' }}
+                    >
+                      Edit post
+                    </button>
+                  )}
                   <button
                     onClick={() => setConfirmDelete(true)}
                     className="px-3 py-1.5 rounded-md text-xs font-medium border transition-colors"

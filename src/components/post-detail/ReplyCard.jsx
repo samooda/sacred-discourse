@@ -17,7 +17,7 @@ export default function ReplyCard({ reply, isLast }) {
     >
       <div className="flex items-center gap-3 mb-3">
         <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
           style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
         >
           {(reply.profiles?.display_name ?? '?')[0].toUpperCase()}
@@ -71,29 +71,30 @@ export default function ReplyCard({ reply, isLast }) {
         )}
       </div>
       <p className="text-gray-400 text-sm leading-relaxed pl-10 break-words">
-        {reply.content.length > 300 ? (
-          <>
-            {expandedReplies.has(reply.id)
-              ? reply.content
-              : reply.content.slice(0, 300) + '…'}
-            {' '}
-            <button
-              type="button"
-              onClick={() =>
-                setExpandedReplies((prev) => {
-                  const next = new Set(prev)
-                  if (prev.has(reply.id)) next.delete(reply.id)
-                  else next.add(reply.id)
-                  return next
-                })
-              }
-              className="text-xs font-medium transition-colors text-indigo-400 hover:text-indigo-300"
-            >
-              {expandedReplies.has(reply.id) ? 'Show less' : 'Show more'}
-            </button>
-          </>
-        ) : reply.content}
+        {reply.content.length > 300
+          ? expandedReplies.has(reply.id)
+            ? reply.content
+            : reply.content.slice(0, 300) + '…'
+          : reply.content}
       </p>
+      {reply.content.length > 300 && (
+        <div className="pl-10 mt-1">
+          <button
+            type="button"
+            onClick={() =>
+              setExpandedReplies((prev) => {
+                const next = new Set(prev)
+                if (prev.has(reply.id)) next.delete(reply.id)
+                else next.add(reply.id)
+                return next
+              })
+            }
+            className="text-xs font-medium transition-colors text-indigo-400 hover:text-indigo-300"
+          >
+            {expandedReplies.has(reply.id) ? 'Show less' : 'Show more'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
