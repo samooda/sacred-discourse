@@ -38,46 +38,67 @@ export default function HomePage() {
         className="relative overflow-hidden border-b"
         style={{ borderColor: '#1f2937' }}
       >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,70,229,0.18) 0%, transparent 70%)',
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center relative">
+        {/* Background — indigo crown + topic color bleeds from bottom corners */}
+        <div className="absolute inset-0 pointer-events-none">
           <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-6 border"
-            style={{
-              backgroundColor: 'rgba(79,70,229,0.15)',
-              borderColor: 'rgba(79,70,229,0.4)',
-              color: '#a5b4fc',
-            }}
-          >
-            Debate · Inquiry · Community
-          </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
-            Where every belief is tested{' '}
-            <span style={{ color: '#818cf8' }}>by reason</span>
+            className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 80% 55% at 50% -5%, rgba(79,70,229,0.22) 0%, transparent 65%)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 55% 45% at 5% 110%, rgba(34,197,94,0.1) 0%, transparent 55%)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{ background: 'radial-gradient(ellipse 55% 45% at 95% 110%, rgba(59,130,246,0.1) 0%, transparent 55%)' }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-28 text-center relative">
+          {/* Headline */}
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-white mb-6 leading-[1.1] tracking-tight">
+            Where every belief is{' '}
+            <span className="italic" style={{ color: '#a5b4fc' }}>tested by reason</span>
           </h1>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Sacred Discourse is a debate forum where scholars, believers, skeptics, and
-            seekers come together to challenge ideas, defend convictions, and pursue truth
-            through honest, rigorous discourse across the world's great religious traditions.
+
+          <p className="text-lg text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+            A forum for scholars, believers, skeptics, and seekers — challenging ideas
+            and pursuing truth across the world's great religious traditions.
           </p>
-          <Link
-              to="/topic/islam"
-              className="px-6 py-3 rounded-lg font-medium text-sm transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
-            >
-              Browse discussions
-            </Link>
+
+          {/* Per-topic CTAs */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {topics.map((topic) => (
+              <Link
+                key={topic.slug}
+                to={`/topic/${topic.slug}`}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border"
+                style={{
+                  backgroundColor: `${topic.accentColor}12`,
+                  borderColor: `${topic.accentColor}30`,
+                  color: topic.accentColor,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = `${topic.accentColor}28`
+                  e.currentTarget.style.borderColor = `${topic.accentColor}55`
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = `${topic.accentColor}12`
+                  e.currentTarget.style.borderColor = `${topic.accentColor}30`
+                }}
+              >
+                <span>{topic.symbol}</span>
+                <span>{topic.name.split(' ')[0]}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Topic cards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-white mb-2">Explore traditions</h2>
+          <h2 className="font-display text-3xl font-semibold text-white mb-2">Explore traditions</h2>
           <p className="text-gray-500 text-sm">
             Select a section to view discussions, read posts, and join the conversation.
           </p>

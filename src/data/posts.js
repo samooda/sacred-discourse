@@ -25,9 +25,9 @@ export const topics = [
     description:
       'Delve into Torah, Talmud, Jewish philosophy, and the enduring heritage of the Jewish people across millennia.',
     symbol: '✡',
-    gradientFrom: '#1e1b4b',
-    gradientTo: '#3730a3',
-    accentColor: '#818cf8',
+    gradientFrom: '#431407',
+    gradientTo: '#9a3412',
+    accentColor: '#fb923c',
   },
   {
     slug: 'atheism',
@@ -35,8 +35,8 @@ export const topics = [
     description:
       'A space for secular thought, philosophical skepticism, humanism, and evidence-based inquiry into religion and belief.',
     symbol: '⚛',
-    gradientFrom: '#1c1c2e',
-    gradientTo: '#374151',
-    accentColor: '#9ca3af',
+    gradientFrom: '#083344',
+    gradientTo: '#0e7490',
+    accentColor: '#06b6d4',
   },
 ]
