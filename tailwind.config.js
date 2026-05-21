@@ -11,6 +11,10 @@ export default {
           950: '#0a0a0f',
         },
       },
+      fontFamily: {
+        sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Cormorant Garamond"', 'Georgia', 'serif'],
+      },
     },
   },
   plugins: [],
