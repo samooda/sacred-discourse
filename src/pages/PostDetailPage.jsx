@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, createContext, useContext } from 'react'
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { supabase } from '../lib/supabase'
@@ -6,9 +6,14 @@ import { useAuth } from '../context/AuthContext'
 import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PrimaryButton from '../components/PrimaryButton'
-import { formatFileSize, formatDate } from '../utils/format'
-import { validateFiles } from '../utils/fileValidation'
-import { getFileIcon } from '../utils/fileIcons'
+import { formatDate } from '../utils/format'
+import EditPostForm from '../components/post-detail/EditPostForm'
+import AttachmentViewer from '../components/post-detail/AttachmentViewer'
+import ReplyCard from '../components/post-detail/ReplyCard'
+import FullscreenImageModal from '../components/post-detail/FullscreenImageModal'
+
+const PostDetailContext = createContext(null)
+export function usePostDetail() { return useContext(PostDetailContext) }
 
 export default function PostDetailPage() {
   const { topicSlug, postId } = useParams()
@@ -89,6 +94,7 @@ export default function PostDetailPage() {
             .from('posts')
             .update({ views: (data.views ?? 0) + 1 })
             .eq('id', postId)
+          setPost((prev) => ({ ...prev, views: (data.views ?? 0) + 1 }))
         } catch (_) {}
       }
 
@@ -253,14 +259,6 @@ export default function PostDetailPage() {
     setEditExistingAttachments([])
     setEditNewFiles([])
     setEditFileError(null)
-  }
-
-  function handleEditFileChange(e) {
-    setEditFileError(null)
-    const { valid, errors } = validateFiles(Array.from(e.target.files))
-    if (errors.length > 0) setEditFileError(errors.join('\n'))
-    if (valid.length > 0) setEditNewFiles((prev) => [...prev, ...valid])
-    e.target.value = ''
   }
 
   async function handleSaveEdit() {
@@ -447,7 +445,24 @@ export default function PostDetailPage() {
     )
   }
 
+  const contextValue = {
+    user, post, topic,
+    replyLikes, toggleReplyLike,
+    deleteReply, deleteReplyErrors,
+    expandedReplies, setExpandedReplies,
+    attachments, expandedAttachment, setExpandedAttachment,
+    fullscreenImage, setFullscreenImage,
+    editTitle, setEditTitle,
+    editDescription, setEditDescription,
+    editExistingAttachments, setEditExistingAttachments,
+    editNewFiles, setEditNewFiles,
+    editFileError, setEditFileError,
+    editSubmitting, editError,
+    handleSaveEdit, cancelEdit,
+  }
+
   return (
+    <PostDetailContext.Provider value={contextValue}>
     <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap">
@@ -505,7 +520,7 @@ export default function PostDetailPage() {
               <span className="text-xs text-gray-600">Edited</span>
             )}
             <span>·</span>
-            <span>{(post.views ?? 0) + 1} views</span>
+            <span>{post.views ?? 0} views</span>
             <span>·</span>
             <span>{replies.length} replies</span>
             <span>·</span>
@@ -597,241 +612,13 @@ export default function PostDetailPage() {
         style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
       >
         {showEditForm ? (
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-white">Edit post</h3>
-
-            {/* Title */}
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Title</label>
-              <input
-                type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors"
-                maxLength={100}
-              />
-              <p
-                className="text-xs text-right mt-1"
-                style={{ color: 100 - editTitle.length < 20 ? '#ef4444' : '#6b7280' }}
-              >
-                {100 - editTitle.length} / 100
-              </p>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Description</label>
-              <textarea
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
-                className="w-full rounded-lg border border-[#2d3748] focus:border-indigo-600 px-3 py-2.5 text-sm text-gray-200 placeholder-gray-600 bg-[#0a0a0f] focus:outline-none transition-colors resize-none"
-                style={{ minHeight: '120px' }}
-                maxLength={750}
-              />
-              <p
-                className="text-xs text-right mt-1"
-                style={{ color: 750 - editDescription.length < 75 ? '#ef4444' : '#6b7280' }}
-              >
-                {750 - editDescription.length} / 750
-              </p>
-            </div>
-
-            {/* Existing attachments */}
-            {editExistingAttachments.length > 0 && (
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                  Existing attachments
-                </label>
-                <ul className="space-y-1">
-                  {editExistingAttachments.map((att) => (
-                    <li
-                      key={att.id}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs border"
-                      style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                    >
-                      <span className="text-gray-300 truncate mr-2">{att.file_name}</span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEditExistingAttachments((prev) => prev.filter((a) => a.id !== att.id))
-                        }
-                        className="text-xs font-medium flex-shrink-0 transition-colors text-red-400 hover:text-red-500"
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* New file picker */}
-            <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                Add attachments <span className="text-gray-600 font-normal">(optional)</span>
-              </label>
-              {editFileError && <ErrorBanner preWrap className="mb-2">{editFileError}</ErrorBanner>}
-              <label
-                className="flex items-center gap-2 w-full rounded-lg border border-[#2d3748] hover:border-indigo-600 px-3 py-2.5 text-sm cursor-pointer transition-colors bg-[#0a0a0f] text-gray-500"
-              >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                </svg>
-                <span>Choose files…</span>
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png,.gif,.pptx,.docx"
-                  onChange={handleEditFileChange}
-                  className="sr-only"
-                />
-              </label>
-              {editNewFiles.length > 0 && (
-                <ul className="mt-2 space-y-1">
-                  {editNewFiles.map((file, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center justify-between rounded-lg px-3 py-2 text-xs border"
-                      style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                    >
-                      <span className="text-gray-300 truncate mr-2">{file.name}</span>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-gray-600">{formatFileSize(file.size)}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setEditNewFiles((prev) => prev.filter((_, idx) => idx !== i))
-                          }
-                          className="text-gray-600 hover:text-gray-300 transition-colors leading-none"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Save / Cancel */}
-            {editError && <ErrorBanner>{editError}</ErrorBanner>}
-            <div className="flex items-center gap-3 pt-2">
-              <PrimaryButton type="button" onClick={handleSaveEdit} loading={editSubmitting} className="px-5 py-2">
-                {editSubmitting ? 'Saving…' : 'Save changes'}
-              </PrimaryButton>
-              <button
-                type="button"
-                onClick={cancelEdit}
-                className="text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
+          <EditPostForm />
         ) : (
           <>
             <p className="text-gray-300 leading-relaxed text-base mb-6 break-words">
               {post.description}
             </p>
-
-            {attachments.length > 0 && (
-              <div className="mt-6 pt-6 border-t" style={{ borderColor: '#1f2937' }}>
-                <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
-                  Attachments
-                </h3>
-                <div className="space-y-2">
-                  {attachments.map((attachment) => {
-                    const icon = getFileIcon(attachment.mime_type)
-                    const url = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/post-attachments/${attachment.file_path}`
-                    return (
-                      <div key={attachment.id}>
-                        <div
-                          className="flex items-center gap-3 rounded-lg border px-4 py-3"
-                          style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748' }}
-                        >
-                          <svg
-                            className="w-5 h-5 flex-shrink-0"
-                            style={{ color: icon.color }}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={icon.path} />
-                          </svg>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-300 truncate">{attachment.file_name}</p>
-                            <p className="text-xs text-gray-600">{formatFileSize(attachment.file_size)}</p>
-                          </div>
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
-                          >
-                            Download
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedAttachment(
-                                expandedAttachment === attachment.id ? null : attachment.id
-                              )
-                            }
-                            className="flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors border-gray-700 hover:border-indigo-600 bg-transparent text-gray-400 hover:text-white"
-                          >
-                            {expandedAttachment === attachment.id ? 'Close' : 'Preview'}
-                          </button>
-                        </div>
-                        {expandedAttachment === attachment.id && (
-                          attachment.mime_type === 'application/pdf' ? (
-                            <div
-                              className="rounded-lg border overflow-hidden"
-                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
-                            >
-                              <p className="text-xs text-gray-600 px-3 pt-2 pb-1">Loading PDF…</p>
-                              <iframe
-                                src={url}
-                                style={{ width: '100%', height: '500px', border: 'none' }}
-                              />
-                            </div>
-                          ) : attachment.mime_type.startsWith('image/') ? (
-                            <div
-                              className="rounded-lg border p-4"
-                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
-                            >
-                              <img
-                                src={url}
-                                alt={attachment.file_name}
-                                className="rounded-lg"
-                                style={{ maxWidth: '100%', height: 'auto', cursor: 'pointer' }}
-                                onClick={() => setFullscreenImage(url)}
-                              />
-                            </div>
-                          ) : attachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || attachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ? (
-                            <div
-                              className="rounded-lg border overflow-hidden"
-                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px' }}
-                            >
-                              <iframe
-                                src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`}
-                                style={{ width: '100%', height: '500px', border: 'none' }}
-                              />
-                            </div>
-                          ) : (
-                            <div
-                              className="rounded-lg border flex items-center justify-center"
-                              style={{ backgroundColor: '#0a0a0f', borderColor: '#2d3748', marginTop: '8px', padding: '24px' }}
-                            >
-                              <p className="text-gray-600 text-sm">Preview not available for this file type</p>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
+            <AttachmentViewer />
           </>
         )}
       </div>
@@ -919,91 +706,7 @@ export default function PostDetailPage() {
         {!repliesError && replies.length > 0 && (
           <div>
             {replies.map((reply, i) => (
-              <div
-                key={reply.id}
-                className={`pb-5 ${i < replies.length - 1 ? 'mb-5 border-b' : ''}`}
-                style={{ borderColor: '#1f2937' }}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                    style={{ backgroundColor: topic.accentColor + '33', color: topic.accentColor }}
-                  >
-                    {(reply.profiles?.display_name ?? '?')[0].toUpperCase()}
-                  </div>
-                  <Link
-                    to={`/profile/${reply.author_id}`}
-                    className="text-sm font-medium text-gray-300 hover:text-white transition-colors"
-                  >
-                    {reply.profiles?.display_name ?? 'Unknown'}
-                  </Link>
-                  <span className="text-xs text-gray-600">{formatDate(reply.created_at)}</span>
-                  <button
-                    onClick={() => toggleReplyLike(reply.id)}
-                    className="ml-auto flex items-center gap-1.5 transition-colors"
-                    style={{ color: replyLikes[reply.id]?.likedByUser ? '#ef4444' : '#6b7280' }}
-                    onMouseEnter={(e) => { if (!replyLikes[reply.id]?.likedByUser) e.currentTarget.style.color = '#9ca3af' }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = replyLikes[reply.id]?.likedByUser ? '#ef4444' : '#6b7280' }}
-                  >
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
-                      {replyLikes[reply.id]?.likedByUser ? (
-                        <path
-                          fill="currentColor"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      ) : (
-                        <path
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      )}
-                    </svg>
-                    <span className="text-xs">{replyLikes[reply.id]?.count ?? 0}</span>
-                  </button>
-                  {(user?.id === reply.author_id || user?.id === post.author_id) && (
-                    <button
-                      type="button"
-                      onClick={() => deleteReply(reply.id)}
-                      className="text-xs font-medium transition-colors text-red-400 hover:text-red-500"
-                    >
-                      Delete
-                    </button>
-                  )}
-                  {deleteReplyErrors[reply.id] && (
-                    <span className="text-xs" style={{ color: '#fca5a5' }}>
-                      {deleteReplyErrors[reply.id]}
-                    </span>
-                  )}
-                </div>
-                <p className="text-gray-400 text-sm leading-relaxed pl-10 break-all">
-                  {reply.content.length > 300 ? (
-                    <>
-                      {expandedReplies.has(reply.id)
-                        ? reply.content
-                        : reply.content.slice(0, 300) + '…'}
-                      {' '}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setExpandedReplies((prev) => {
-                            const next = new Set(prev)
-                            if (prev.has(reply.id)) next.delete(reply.id)
-                            else next.add(reply.id)
-                            return next
-                          })
-                        }
-                        className="text-xs font-medium transition-colors text-indigo-400 hover:text-indigo-300"
-                      >
-                        {expandedReplies.has(reply.id) ? 'Show less' : 'Show more'}
-                      </button>
-                    </>
-                  ) : reply.content}
-                </p>
-              </div>
+              <ReplyCard key={reply.id} reply={reply} isLast={i === replies.length - 1} />
             ))}
           </div>
         )}
@@ -1021,27 +724,8 @@ export default function PostDetailPage() {
         Back to {topic.name}
       </Link>
 
-      {/* Fullscreen image modal */}
-      {fullscreenImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}
-          onClick={() => setFullscreenImage(null)}
-        >
-          <button
-            onClick={() => setFullscreenImage(null)}
-            className="absolute top-4 right-4 text-white text-3xl font-light leading-none hover:text-gray-300 transition-colors"
-          >
-            ×
-          </button>
-          <img
-            src={fullscreenImage}
-            alt=""
-            style={{ maxWidth: '90%', maxHeight: '90vh', objectFit: 'contain' }}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      <FullscreenImageModal />
     </main>
+    </PostDetailContext.Provider>
   )
 }
