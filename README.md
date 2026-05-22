@@ -232,4 +232,3 @@ A `profiles` row is created automatically via a Supabase trigger on `auth.users`
 
 ---
 
-*Built as a portfolio project to demonstrate full-stack React development, Supabase-backed architecture, deliberate technical decisions, and end-to-end feature implementation.*
