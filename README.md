@@ -19,6 +19,12 @@ Sacred Discourse is a structured debate forum spanning four traditions — Islam
 
 ---
 
+## Why I Built This
+
+I've spent years studying theology and comparative religion — it's genuinely one of the things I find most interesting to think about, and I wanted a space where those conversations could happen with some structure and care. Most online discussions about religion lose shape quickly, and I wanted to see what a more intentional forum could look like across Islam, Christianity, Judaism, and secular thought. Building Sacred Discourse let me work on something technically serious while solving a problem I actually care about. Longer-term, I'm hoping to keep improving the platform and eventually deploy it for the Dawah Club at my school, pending approval.
+
+---
+
 ## Live Demo
 
 **[sacred-discourse.vercel.app](https://sacred-discourse.vercel.app)**
@@ -221,6 +227,16 @@ A `profiles` row is created automatically via a Supabase trigger on `auth.users`
 - **Google OAuth** — a one-click sign-in path alongside the existing email/password flow
 - **Moderation tools** — admin role with the ability to pin posts, lock threads, and remove content
 - **Pagination or infinite scroll** — the current implementation loads all posts per topic in a single query; pagination would be necessary at scale
+
+---
+
+## What I Learned
+
+- Building security at the database layer instead of the application layer changed how I think about trust boundaries — the database rejects an unauthorized operation outright, so there is no route guard that can accidentally fail to run, and any future client inherits the same guarantees without extra work.
+- Real UX edge cases — orphaned Storage files after a failed post insert, UI that needs to revert silently on a failed optimistic update, empty states that distinguish "no data" from "query failed" — exposed a whole layer of work that tutorial projects skip entirely, and getting them right took more time than the happy-path features.
+- Treating this as something I actually intend to deploy forced harder decisions: I had to decide what "done enough" means for each feature and resist shipping half-finished work just to check a box.
+- Scope management turned out to be as important as any technical skill — the Future Improvements section is a deliberate record of work I chose to defer, not things I ran out of time for, and drawing that line clearly kept the shipped features solid.
+- If I were starting over, I would design for pagination from the first query rather than treating it as something to layer in later; it touches the data-fetching shape deeply enough that retrofitting it is more disruptive than building it in from the start.
 
 ---
 
