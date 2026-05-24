@@ -185,7 +185,7 @@ export default function ProfilePage() {
           )}
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white break-words">{profile.display_name}</h1>
+          <h1 className="font-display text-3xl font-semibold text-white break-words">{profile.display_name}</h1>
           {isOwnProfile && !showEditForm && (
             <button
               onClick={startEdit}

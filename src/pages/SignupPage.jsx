@@ -88,7 +88,7 @@ export default function SignupPage() {
         >
           SD
         </div>
-        <h1 className="text-xl font-bold text-white">Join Sacred Discourse</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Join Sacred Discourse</h1>
         <p className="text-sm text-gray-500 mt-1">Create your free account</p>
       </div>
 

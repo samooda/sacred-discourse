@@ -49,7 +49,7 @@ export default function LoginPage() {
         >
           SD
         </div>
-        <h1 className="text-xl font-bold text-white">Welcome back</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Welcome back</h1>
         <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
       </div>
 

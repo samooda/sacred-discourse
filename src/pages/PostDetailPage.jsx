@@ -494,7 +494,7 @@ export default function PostDetailPage() {
         />
         <div className="p-6 sm:p-8">
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4 break-words">
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold text-white leading-tight mb-4 break-words">
             {post.title}
           </h1>
 
@@ -644,7 +644,7 @@ export default function PostDetailPage() {
         className="rounded-xl border p-6 sm:p-8 mb-6"
         style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
       >
-        <h2 className="font-semibold text-white mb-6">
+        <h2 className="font-display text-lg font-semibold text-white mb-6">
           Replies{' '}
           <span
             className="ml-1 px-2 py-0.5 rounded-full text-xs font-normal"

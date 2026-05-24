@@ -226,7 +226,7 @@ export default function TopicPage() {
             {topic.symbol}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-white">{topic.name}</h1>
+            <h1 className="font-display text-2xl font-semibold text-white">{topic.name}</h1>
             <p className="text-gray-400 text-sm mt-1 leading-relaxed">{topic.description}</p>
           </div>
           <div className="hidden sm:flex flex-col items-end gap-1">
