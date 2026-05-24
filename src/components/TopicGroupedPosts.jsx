@@ -13,12 +13,8 @@ export default function TopicGroupedPosts({ posts, emptyState }) {
       {groups.map(({ topic, posts: topicPosts }) => (
         <section key={topic.slug}>
           <h3
-            className="text-sm font-semibold uppercase tracking-wider mb-3"
-            style={{
-              color: topic.accentColor,
-              borderLeft: `3px solid ${topic.accentColor}60`,
-              paddingLeft: '10px',
-            }}
+            className="text-xs font-semibold uppercase tracking-wider mb-3"
+            style={{ color: topic.accentColor }}
           >
             {topic.name}
           </h3>

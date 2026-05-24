@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { topics } from '../data/posts'
 import { formatDate } from '../utils/format'
 
-export default function PostCard({ post, topicSlug, index = 0 }) {
+export default function PostCard({ post, topicSlug }) {
   const navigate = useNavigate()
   const topic = topics.find((t) => t.slug === topicSlug)
   const accentColor = topic?.accentColor ?? '#9ca3af'
@@ -22,21 +22,14 @@ export default function PostCard({ post, topicSlug, index = 0 }) {
       style={{
         backgroundColor: '#111118',
         borderColor: '#1f2937',
-        borderLeftColor: `${accentColor}80`,
-        borderLeftWidth: '3px',
-        animation: 'cardFadeIn 200ms ease-out forwards',
-        animationDelay: `${Math.min(index, 7) * 40}ms`,
-        opacity: 0,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = `${accentColor}44`
-        e.currentTarget.style.borderLeftColor = `${accentColor}cc`
-        e.currentTarget.style.backgroundColor = '#131320'
+        e.currentTarget.style.borderColor = `${accentColor}50`
+        e.currentTarget.style.backgroundColor = '#0f0f1a'
         e.currentTarget.querySelector('h3').style.color = accentColor
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = '#1f2937'
-        e.currentTarget.style.borderLeftColor = `${accentColor}80`
         e.currentTarget.style.backgroundColor = '#111118'
         e.currentTarget.querySelector('h3').style.color = ''
       }}

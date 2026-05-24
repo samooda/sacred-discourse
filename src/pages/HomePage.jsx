@@ -97,99 +97,76 @@ export default function HomePage() {
 
       {/* Topic cards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="mb-10">
+        <div className="mb-8">
           <h2 className="font-display text-3xl font-semibold text-white">Explore traditions</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="space-y-4">
           {topics.map((topic) => {
             const latestPost = latestPosts[topic.slug]
             return (
               <Link
                 key={topic.slug}
                 to={`/topic/${topic.slug}`}
-                className="group block rounded-xl border overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                className="group block rounded-xl border overflow-hidden transition-all duration-200"
                 style={{
                   backgroundColor: '#111118',
                   borderColor: '#1f2937',
-                  boxShadow: '0 0 0 0 transparent',
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = topic.accentColor + '55'
-                  e.currentTarget.style.boxShadow = `0 4px 24px ${topic.accentColor}18`
+                  e.currentTarget.style.boxShadow = `0 4px 24px ${topic.accentColor}14`
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = '#1f2937'
-                  e.currentTarget.style.boxShadow = '0 0 0 0 transparent'
+                  e.currentTarget.style.boxShadow = 'none'
                 }}
               >
-                {/* Card header gradient */}
+                {/* Thin gradient accent bar */}
                 <div
-                  className="h-2 w-full"
+                  className="h-1 w-full"
                   style={{
                     background: `linear-gradient(to right, ${topic.gradientFrom}, ${topic.gradientTo})`,
                   }}
                 />
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-                        style={{
-                          backgroundColor: topic.accentColor + '22',
-                          color: topic.accentColor,
-                        }}
-                      >
-                        {topic.symbol}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-white text-lg group-hover:text-white transition-colors">
-                          {topic.name}
-                        </h3>
-                        <span className="text-xs text-gray-500">
-                          {postCounts[topic.slug] ?? 0} posts
-                        </span>
-                      </div>
-                    </div>
-                    <svg
-                      className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors mt-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </div>
-                  {/* Latest post preview */}
+                <div className="p-5 sm:p-6 flex items-start gap-4">
+                  {/* Symbol */}
                   <div
-                    className="rounded-lg p-3 border"
-                    style={{
-                      backgroundColor: '#0a0a0f',
-                      borderColor: '#1f2937',
-                      borderLeftColor: `${topic.accentColor}55`,
-                      borderLeftWidth: '3px',
-                    }}
+                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl flex-shrink-0 mt-0.5"
+                    style={{ backgroundColor: topic.accentColor + '22', color: topic.accentColor }}
                   >
-                    <p className="text-xs text-gray-500 mb-1">Latest post</p>
+                    {topic.symbol}
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline gap-3 mb-1.5">
+                      <h3 className="font-display font-semibold text-lg text-white transition-colors">
+                        {topic.name}
+                      </h3>
+                      <span className="text-xs text-gray-600 flex-shrink-0">
+                        {postCounts[topic.slug] ?? 0} posts
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 leading-relaxed mb-2">
+                      {topic.description}
+                    </p>
                     {latestPost ? (
-                      <>
-                        <p className="text-sm text-gray-300 font-medium leading-snug line-clamp-2">
-                          {latestPost.title}
-                        </p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs text-gray-600">
-                            {latestPost.profiles?.display_name ?? 'Unknown'}
-                          </span>
-                        </div>
-                      </>
+                      <p className="text-xs text-gray-600 truncate">
+                        Latest: <span className="text-gray-400">{latestPost.title}</span>
+                        {' · '}{latestPost.profiles?.display_name ?? 'Unknown'}
+                      </p>
                     ) : (
-                      <p className="text-sm text-gray-600">No posts yet</p>
+                      <p className="text-xs text-gray-700">No posts yet</p>
                     )}
                   </div>
+                  {/* Arrow */}
+                  <svg
+                    className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors mt-1.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </Link>
             )
