@@ -688,7 +688,7 @@ export default function PostDetailPage() {
                 {2000 - replyText.length} / 2000
               </p>
               <div className="flex justify-end mt-3">
-                <PrimaryButton type="submit" loading={submitting} className="px-4 py-2">
+                <PrimaryButton type="submit" loading={submitting} accent={topic.accentColor} className="px-4 py-2">
                   {submitting ? 'Posting…' : 'Post reply'}
                 </PrimaryButton>
               </div>
@@ -702,7 +702,10 @@ export default function PostDetailPage() {
             <p className="text-sm text-gray-400 mb-3">Join the discussion</p>
             <Link
               to="/login"
-              className="inline-flex items-center px-4 py-2 rounded-md text-xs font-medium transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
+              className="inline-flex items-center px-4 py-2 rounded-md text-xs font-medium transition-all text-white"
+              style={{ backgroundColor: '#5c4ef8' }}
+              onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(0.88)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.filter = '' }}
             >
               Sign in to reply
             </Link>

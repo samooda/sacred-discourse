@@ -58,7 +58,10 @@ export default function SignupPage() {
           </p>
           <Link
             to="/login"
-            className="inline-block mt-6 px-5 py-2 rounded-lg text-sm font-medium transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
+            className="inline-block mt-6 px-5 py-2 rounded-lg text-sm font-medium transition-all text-white"
+            style={{ backgroundColor: '#5c4ef8' }}
+            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(0.88)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.filter = '' }}
           >
             Go to sign in
           </Link>

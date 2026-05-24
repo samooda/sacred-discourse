@@ -244,12 +244,22 @@ export default function TopicPage() {
         {user && (
           <button
             onClick={() => setShowForm((v) => !v)}
-            className={`px-4 py-2 text-xs font-medium rounded-md transition-colors ${
-              showForm
-                ? 'border text-gray-400 hover:text-white'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-indigo-100'
-            }`}
-            style={showForm ? { borderColor: '#374151', backgroundColor: 'transparent' } : {}}
+            className="px-4 py-2 text-xs font-medium rounded-md transition-all border"
+            style={showForm
+              ? { borderColor: '#374151', backgroundColor: 'transparent', color: '#9ca3af' }
+              : { backgroundColor: topic.accentColor, borderColor: topic.accentColor, color: '#fff' }
+            }
+            onMouseEnter={(e) => {
+              if (showForm) {
+                e.currentTarget.style.color = '#fff'
+              } else {
+                e.currentTarget.style.filter = 'brightness(0.88)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = ''
+              if (showForm) e.currentTarget.style.color = '#9ca3af'
+            }}
           >
             {showForm ? 'Cancel' : '+ New post'}
           </button>
@@ -350,7 +360,7 @@ export default function TopicPage() {
               )}
             </div>
             <div className="flex justify-end">
-              <PrimaryButton type="submit" loading={submitting} className="px-5 py-2">
+              <PrimaryButton type="submit" loading={submitting} accent={topic.accentColor} className="px-5 py-2">
                 {submitting ? 'Posting…' : 'Post discussion'}
               </PrimaryButton>
             </div>

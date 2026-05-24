@@ -184,7 +184,10 @@ export default function Navbar() {
                 </Link>
                 <Link
                   to="/signup"
-                  className="px-4 py-1.5 text-sm font-medium rounded-md transition-colors bg-indigo-600 hover:bg-indigo-700 text-indigo-100"
+                  className="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-white"
+                  style={{ backgroundColor: '#5c4ef8' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(0.88)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.filter = '' }}
                 >
                   Sign up
                 </Link>
