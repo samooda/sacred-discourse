@@ -50,7 +50,7 @@ export default function SignupPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Check your email</h2>
+          <h2 className="font-display text-xl font-semibold text-white mb-2">Check your email</h2>
           <p className="text-sm text-gray-400 leading-relaxed">
             We sent a confirmation link to{' '}
             <span className="text-gray-200">{email}</span>. Click it to activate

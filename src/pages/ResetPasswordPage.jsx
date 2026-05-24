@@ -54,7 +54,7 @@ export default function ResetPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Password updated</h2>
+          <h2 className="font-display text-xl font-semibold text-white mb-2">Password updated</h2>
           <p className="text-sm text-gray-400">Redirecting you to sign in…</p>
         </div>
       </AuthPageLayout>
@@ -70,7 +70,7 @@ export default function ResetPasswordPage() {
         >
           SD
         </div>
-        <h1 className="text-xl font-bold text-white">Choose a new password</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Choose a new password</h1>
         <p className="text-sm text-gray-500 mt-1">Must be at least 8 characters</p>
       </div>
 

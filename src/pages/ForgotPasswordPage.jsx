@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold text-white mb-2">Check your email</h2>
+          <h2 className="font-display text-xl font-semibold text-white mb-2">Check your email</h2>
           <p className="text-sm text-gray-400 leading-relaxed mb-6">
             We sent a password reset link to{' '}
             <span className="text-gray-200">{email}</span>. Click it to choose a new password.
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
         >
           SD
         </div>
-        <h1 className="text-xl font-bold text-white">Reset your password</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Reset your password</h1>
         <p className="text-sm text-gray-500 mt-1">
           Enter your email and we'll send you a reset link
         </p>
