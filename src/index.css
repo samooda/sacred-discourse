@@ -7,13 +7,14 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 .page-fade {
   animation: pageFadeIn 160ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-fade {
+    animation: none;
+  }
 }
 
 @layer base {
