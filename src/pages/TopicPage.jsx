@@ -424,8 +424,8 @@ export default function TopicPage() {
       {/* Posts */}
       {!postsLoading && !postsError && posts.length > 0 && (
         <div className="space-y-3">
-          {posts.map((post, i) => (
-            <PostCard key={post.id} post={post} topicSlug={topicSlug} index={i} />
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} topicSlug={topicSlug} />
           ))}
         </div>
       )}

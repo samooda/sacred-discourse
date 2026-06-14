@@ -19,8 +19,8 @@ export default function TopicGroupedPosts({ posts, emptyState }) {
             {topic.name}
           </h3>
           <div className="space-y-3">
-            {topicPosts.map((post, i) => (
-              <PostCard key={post.id} post={post} topicSlug={post.topic_slug} index={i} />
+            {topicPosts.map((post) => (
+              <PostCard key={post.id} post={post} topicSlug={post.topic_slug} />
             ))}
           </div>
         </section>
