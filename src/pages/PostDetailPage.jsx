@@ -102,6 +102,8 @@ export default function PostDetailPage() {
     }
 
     loadPost()
+    // `user` is intentionally excluded: re-running on auth change would re-increment views.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId, topicSlug])
 
   // Effect 2: fetch replies and their like counts.
@@ -148,7 +150,8 @@ export default function PostDetailPage() {
     }
 
     loadReplies()
-  }, [postId, topicSlug, repliesVersion])
+    // `user` is included so each reply's likedByUser flag recomputes on login/logout.
+  }, [postId, topicSlug, repliesVersion, user])
 
   // Effect 3: fetch file attachments for this post.
   useEffect(() => {
