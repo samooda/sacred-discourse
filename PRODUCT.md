@@ -37,5 +37,5 @@ Voice is measured, never preachy. It makes space for disagreement without encour
 
 - Target WCAG AA minimum; AA-large on body copy.
 - Keyboard navigation is already partially implemented (role=button + onKeyDown on PostCard). Maintain and extend this.
-- Reduced motion: the current `pageFadeIn` / `cardFadeIn` animations should respect `prefers-reduced-motion`.
+- Reduced motion: the current `pageFadeIn` animation should respect `prefers-reduced-motion`.
 - Color is never the sole signal for state (error, active, liked) — always paired with an icon, label, or structural change.

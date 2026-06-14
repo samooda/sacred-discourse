@@ -74,7 +74,7 @@ Create an account, post a discussion, reply to others, upload attachments, searc
 
 ### Navigation
 - Sticky navbar with a Topics dropdown; keyboard-accessible search (Enter with ≥ 3 characters)
-- Route fade transition and staggered post card enter animations
+- Route fade transition between pages
 
 ---
 
