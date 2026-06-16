@@ -86,14 +86,12 @@ export default function PostDetailPage() {
 
       setPost(data)
 
-      // Increment views only when a non-author is viewing.
-      // Skips logged-out users and the post's own author.
-      if (user && user.id !== data.author_id) {
+      // Increment views for every visitor except the post's own author —
+      // logged-out (anon) visitors count too. Uses an RPC so the bump is
+      // atomic and runs as owner, bypassing the author-only UPDATE policy.
+      if (!user || user.id !== data.author_id) {
         try {
-          await supabase
-            .from('posts')
-            .update({ views: (data.views ?? 0) + 1 })
-            .eq('id', postId)
+          await supabase.rpc('increment_post_views', { p_post_id: postId })
           setPost((prev) => ({ ...prev, views: (data.views ?? 0) + 1 }))
         } catch (_) {
           // A failed view bump is non-critical; ignore it.
@@ -379,7 +377,8 @@ export default function PostDetailPage() {
       const { error } = await supabase
         .from('likes')
         .insert({ reply_id: replyId, user_id: user.id })
-      if (error) setReplyLikes((prev) => ({ ...prev, [replyId]: current }))
+      // 23505 = like already exists (unique constraint); treat as a no-op success.
+      if (error && error.code !== '23505') setReplyLikes((prev) => ({ ...prev, [replyId]: current }))
     }
   }
 
@@ -404,7 +403,8 @@ export default function PostDetailPage() {
       const { error } = await supabase
         .from('likes')
         .insert({ post_id: postId, user_id: user.id })
-      if (error) {
+      // 23505 = like already exists (unique constraint); treat as a no-op success.
+      if (error && error.code !== '23505') {
         setPostLikedByUser(wasLiked)
         setPostLikeCount((c) => (wasLiked ? c + 1 : c - 1))
       }
