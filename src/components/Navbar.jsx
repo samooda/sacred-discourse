@@ -17,6 +17,9 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -26,6 +29,9 @@ export default function Navbar() {
       }
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setDropdownOpen(false)
+      }
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
       }
     }
     document.addEventListener('mousedown', handleMouseDown)
@@ -38,6 +44,35 @@ export default function Navbar() {
     if (q.length < 3) return
     navigate(`/search?q=${encodeURIComponent(q)}`)
     setSearchQuery('')
+    setMenuOpen(false)
+  }
+
+  function renderTopicRow(topic, onSelect) {
+    const isActive = topic.slug === currentTopicSlug
+    return (
+      <button
+        key={topic.slug}
+        onClick={() => { onSelect(); navigate(`/topic/${topic.slug}`) }}
+        className="w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2.5"
+        style={{
+          color: isActive ? topic.accentColor : '#d1d5db',
+          backgroundColor: isActive ? `${topic.accentColor}18` : 'transparent',
+        }}
+        onMouseEnter={(e) => {
+          if (!isActive) {
+            e.currentTarget.style.color = '#ffffff'
+            e.currentTarget.style.backgroundColor = '#1f2937'
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = isActive ? topic.accentColor : '#d1d5db'
+          e.currentTarget.style.backgroundColor = isActive ? `${topic.accentColor}18` : 'transparent'
+        }}
+      >
+        <span>{topic.symbol}</span>
+        <span>{topic.name}</span>
+      </button>
+    )
   }
 
   return (
@@ -82,33 +117,7 @@ export default function Navbar() {
                   className="absolute left-0 mt-1.5 w-52 rounded-md border py-1 shadow-xl z-[60]"
                   style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}
                 >
-                  {topics.map((topic) => {
-                    const isActive = topic.slug === currentTopicSlug
-                    return (
-                      <button
-                        key={topic.slug}
-                        onClick={() => { setTopicsOpen(false); navigate(`/topic/${topic.slug}`) }}
-                        className="w-full text-left px-4 py-2 text-sm transition-colors flex items-center gap-2.5"
-                        style={{
-                          color: isActive ? topic.accentColor : '#d1d5db',
-                          backgroundColor: isActive ? `${topic.accentColor}18` : 'transparent',
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.color = '#ffffff'
-                            e.currentTarget.style.backgroundColor = '#1f2937'
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = isActive ? topic.accentColor : '#d1d5db'
-                          e.currentTarget.style.backgroundColor = isActive ? `${topic.accentColor}18` : 'transparent'
-                        }}
-                      >
-                        <span>{topic.symbol}</span>
-                        <span>{topic.name}</span>
-                      </button>
-                    )
-                  })}
+                  {topics.map((topic) => renderTopicRow(topic, () => setTopicsOpen(false)))}
                 </div>
               )}
             </div>
@@ -132,8 +141,57 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Right — auth */}
+          {/* Right — mobile menu toggle + auth */}
           <div className="flex items-center gap-2">
+            {/* Mobile hamburger (below md) */}
+            <div className="relative md:hidden" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-label="Menu"
+                aria-expanded={menuOpen}
+                className="flex items-center justify-center w-9 h-9 rounded-md text-gray-400 hover:text-gray-100 hover:bg-gray-800/60 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {menuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+
+              {menuOpen && (
+                <div
+                  className="absolute right-0 mt-3 w-64 rounded-md border py-1.5 shadow-xl z-[60]"
+                  style={{ backgroundColor: '#111827', borderColor: '#1f2937' }}
+                >
+                  {/* Search */}
+                  <div className="px-3 pb-1.5">
+                    <div className="relative">
+                      <svg
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Search posts…"
+                        className="w-full pl-8 pr-3 py-1.5 rounded-md text-sm text-gray-300 placeholder-gray-600 focus:outline-none transition-colors bg-[#111827] border border-[#2d3748] focus:border-indigo-600"
+                      />
+                    </div>
+                  </div>
+                  {/* Topics */}
+                  <div className="border-t pt-1 mt-0.5" style={{ borderColor: '#1f2937' }}>
+                    {topics.map((topic) => renderTopicRow(topic, () => setMenuOpen(false)))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {user ? (
               <div className="relative" ref={dropdownRef}>
                 <button
