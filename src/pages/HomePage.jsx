@@ -9,20 +9,18 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchData() {
-      // Single query for both post counts and latest-post previews.
-      // Ordered newest-first so the first result per slug is the latest post.
-      const { data } = await supabase
-        .from('posts')
-        .select('topic_slug, title, profiles ( display_name )')
-        .order('created_at', { ascending: false })
+      // One RPC returns per-topic count + latest title/author, instead of
+      // fetching every post row and grouping client-side.
+      const { data } = await supabase.rpc('topic_summaries')
 
       if (data) {
         const counts = {}
         const latest = {}
-        for (const t of topics) {
-          const forTopic = data.filter((p) => p.topic_slug === t.slug)
-          counts[t.slug] = forTopic.length
-          latest[t.slug] = forTopic[0] ?? null
+        for (const row of data) {
+          counts[row.topic_slug] = Number(row.post_count)
+          latest[row.topic_slug] = row.latest_title
+            ? { title: row.latest_title, author: row.latest_author }
+            : null
         }
         setPostCounts(counts)
         setLatestPosts(latest)
@@ -152,7 +150,7 @@ export default function HomePage() {
                     {latestPost ? (
                       <p className="text-xs text-gray-600 truncate">
                         Latest: <span className="text-gray-400">{latestPost.title}</span>
-                        {' · '}{latestPost.profiles?.display_name ?? 'Unknown'}
+                        {' · '}{latestPost.author ?? 'Unknown'}
                       </p>
                     ) : (
                       <p className="text-xs text-gray-700">No posts yet</p>
