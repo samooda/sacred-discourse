@@ -31,6 +31,10 @@ export default [
       'react/prop-types': 'off',
       // Vite uses the automatic JSX runtime, so React need not be in scope.
       'react/react-in-jsx-scope': 'off',
+      // Cosmetic-only: flags apostrophes/quotes in JSX copy. Same flood class as
+      // prop-types above; escaping user-facing text hurts readability without
+      // catching bugs.
+      'react/no-unescaped-entities': 'off',
       'no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },

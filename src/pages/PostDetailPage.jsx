@@ -95,7 +95,9 @@ export default function PostDetailPage() {
             .update({ views: (data.views ?? 0) + 1 })
             .eq('id', postId)
           setPost((prev) => ({ ...prev, views: (data.views ?? 0) + 1 }))
-        } catch (_) {}
+        } catch (_) {
+          // A failed view bump is non-critical; ignore it.
+        }
       }
 
       setLoading(false)
@@ -151,7 +153,7 @@ export default function PostDetailPage() {
 
     loadReplies()
     // `user` is included so each reply's likedByUser flag recomputes on login/logout.
-  }, [postId, topicSlug, repliesVersion, user])
+  }, [postId, topicSlug, repliesVersion, user, topic])
 
   // Effect 3: fetch file attachments for this post.
   useEffect(() => {
