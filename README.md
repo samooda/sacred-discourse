@@ -172,14 +172,20 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the project root:
+Copy the example file and fill in your own values:
+
+```bash
+cp .env.example .env
+```
+
+This creates a `.env` in the project root with the required keys:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-Both values are available in your Supabase project under **Settings → API**.
+Both values are available in your Supabase project under **Settings → API**. The `.env` file is gitignored; `.env.example` is the committed template.
 
 ### Run Locally
 
