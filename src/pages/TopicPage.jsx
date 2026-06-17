@@ -7,8 +7,16 @@ import PostCard from '../components/PostCard'
 import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PrimaryButton from '../components/PrimaryButton'
+import LoadMoreButton from '../components/LoadMoreButton'
 import { formatFileSize } from '../utils/format'
 import { validateFiles } from '../utils/fileValidation'
+
+const PAGE_SIZE = 10
+const POST_SELECT = `
+  id, title, views, created_at, author_id,
+  profiles ( display_name ),
+  replies ( id )
+`
 
 export default function TopicPage() {
   const { topicSlug } = useParams()
@@ -16,7 +24,9 @@ export default function TopicPage() {
   const topic = topics.find((t) => t.slug === topicSlug)
 
   const [posts, setPosts] = useState([])
+  const [totalCount, setTotalCount] = useState(0)
   const [postsLoading, setPostsLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [postsError, setPostsError] = useState(null)
   // Incrementing this triggers a re-fetch without re-running the slug effect.
   const [postsVersion, setPostsVersion] = useState(0)
@@ -38,26 +48,43 @@ export default function TopicPage() {
       setPostsLoading(true)
       setPostsError(null)
 
-      const { data, error } = await supabase
+      const { data, count, error } = await supabase
         .from('posts')
-        .select(`
-          id, title, views, created_at, author_id,
-          profiles ( display_name ),
-          replies ( id )
-        `)
+        .select(POST_SELECT, { count: 'exact' })
         .eq('topic_slug', topicSlug)
         .order('created_at', { ascending: false })
+        .range(0, PAGE_SIZE - 1)
 
       if (error) {
         setPostsError(error.message)
       } else {
         setPosts(data || [])
+        setTotalCount(count ?? 0)
       }
       setPostsLoading(false)
     }
 
     fetchPosts()
   }, [topicSlug, postsVersion, topic]) // postsVersion lets handleNewPost trigger a reload
+
+  async function loadMore() {
+    setLoadingMore(true)
+    setPostsError(null)
+
+    const { data, error } = await supabase
+      .from('posts')
+      .select(POST_SELECT)
+      .eq('topic_slug', topicSlug)
+      .order('created_at', { ascending: false })
+      .range(posts.length, posts.length + PAGE_SIZE - 1)
+
+    if (error) {
+      setPostsError(error.message)
+    } else {
+      setPosts((prev) => [...prev, ...(data || [])])
+    }
+    setLoadingMore(false)
+  }
 
   useEffect(() => {
     setShowForm(false)
@@ -224,7 +251,7 @@ export default function TopicPage() {
             <p className="text-gray-400 text-sm mt-1 leading-relaxed">{topic.description}</p>
           </div>
           <div className="hidden sm:flex flex-col items-end gap-1">
-            <span className="text-2xl font-bold text-white">{posts.length}</span>
+            <span className="text-2xl font-bold text-white">{totalCount}</span>
             <span className="text-xs text-gray-500">discussions</span>
           </div>
         </div>
@@ -417,11 +444,16 @@ export default function TopicPage() {
 
       {/* Posts */}
       {!postsLoading && !postsError && posts.length > 0 && (
-        <div className="space-y-3">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} topicSlug={topicSlug} />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} topicSlug={topicSlug} />
+            ))}
+          </div>
+          {posts.length < totalCount && (
+            <LoadMoreButton onClick={loadMore} loading={loadingMore} />
+          )}
+        </>
       )}
 
       {/* Other topics */}

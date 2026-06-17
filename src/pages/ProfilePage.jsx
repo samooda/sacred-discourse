@@ -6,6 +6,14 @@ import ErrorBanner from '../components/ErrorBanner'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PrimaryButton from '../components/PrimaryButton'
 import TopicGroupedPosts from '../components/TopicGroupedPosts'
+import LoadMoreButton from '../components/LoadMoreButton'
+
+const PAGE_SIZE = 10
+const POST_SELECT = `
+  id, title, views, topic_slug, created_at, author_id,
+  profiles ( display_name ),
+  replies ( id )
+`
 
 export default function ProfilePage() {
   const { userId } = useParams()
@@ -16,7 +24,9 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false)
 
   const [posts, setPosts] = useState([])
+  const [totalCount, setTotalCount] = useState(0)
   const [postsLoading, setPostsLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [postsError, setPostsError] = useState(null)
 
   const [showEditForm, setShowEditForm] = useState(false)
@@ -51,24 +61,39 @@ export default function ProfilePage() {
     async function fetchPosts() {
       setPostsLoading(true)
       setPostsError(null)
-      const { data, error } = await supabase
+      const { data, count, error } = await supabase
         .from('posts')
-        .select(`
-          id, title, views, topic_slug, created_at, author_id,
-          profiles ( display_name ),
-          replies ( id )
-        `)
+        .select(POST_SELECT, { count: 'exact' })
         .eq('author_id', userId)
         .order('created_at', { ascending: false })
+        .range(0, PAGE_SIZE - 1)
       if (error) {
         setPostsError(error.message)
       } else {
         setPosts(data || [])
+        setTotalCount(count ?? 0)
       }
       setPostsLoading(false)
     }
     fetchPosts()
   }, [userId])
+
+  async function loadMore() {
+    setLoadingMore(true)
+    setPostsError(null)
+    const { data, error } = await supabase
+      .from('posts')
+      .select(POST_SELECT)
+      .eq('author_id', userId)
+      .order('created_at', { ascending: false })
+      .range(posts.length, posts.length + PAGE_SIZE - 1)
+    if (error) {
+      setPostsError(error.message)
+    } else {
+      setPosts((prev) => [...prev, ...(data || [])])
+    }
+    setLoadingMore(false)
+  }
 
   function startEdit() {
     setEditDisplayName(profile.display_name || '')
@@ -281,25 +306,30 @@ export default function ProfilePage() {
       {!postsLoading && !postsError && posts.length > 0 && (
         <h2 className="text-lg font-semibold text-white mb-6 break-words">
           {profile.display_name}'s posts
-          <span className="ml-2 text-sm font-normal text-gray-500">({posts.length})</span>
+          <span className="ml-2 text-sm font-normal text-gray-500">({totalCount})</span>
         </h2>
       )}
 
       {!postsLoading && !postsError && (
-        <TopicGroupedPosts
-          posts={posts}
-          emptyState={
-            <div
-              className="rounded-xl border py-16 text-center"
-              style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
-            >
-              <p className="text-gray-400 text-sm font-medium mb-1">No posts yet</p>
-              <p className="text-gray-600 text-xs">
-                {isOwnProfile ? 'Your discussions will appear here.' : 'This user has not posted yet.'}
-              </p>
-            </div>
-          }
-        />
+        <>
+          <TopicGroupedPosts
+            posts={posts}
+            emptyState={
+              <div
+                className="rounded-xl border py-16 text-center"
+                style={{ borderColor: '#1f2937', backgroundColor: '#111118' }}
+              >
+                <p className="text-gray-400 text-sm font-medium mb-1">No posts yet</p>
+                <p className="text-gray-600 text-xs">
+                  {isOwnProfile ? 'Your discussions will appear here.' : 'This user has not posted yet.'}
+                </p>
+              </div>
+            }
+          />
+          {posts.length < totalCount && (
+            <LoadMoreButton onClick={loadMore} loading={loadingMore} />
+          )}
+        </>
       )}
     </main>
   )
